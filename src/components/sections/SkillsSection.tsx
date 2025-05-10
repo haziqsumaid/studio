@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Section } from '@/components/Section';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { skillsData, skillCategories, type Skill } from '@/config/skills';
@@ -36,7 +37,6 @@ const SkillItem: React.FC<SkillItemProps> = ({ skill, isReducedMotion }) => {
   const [progressValue, setProgressValue] = useState(0);
 
   useEffect(() => {
-    // Animate progress bar on mount if not reduced motion
     if (!isReducedMotion) {
       const timer = setTimeout(() => setProgressValue(skill.proficiency), 100);
       return () => clearTimeout(timer);
@@ -82,12 +82,21 @@ const SkillItem: React.FC<SkillItemProps> = ({ skill, isReducedMotion }) => {
 export function SkillsSection() {
   const [isClient, setIsClient] = useState(false);
   const framerReducedMotion = useReducedMotion();
-  const [isReducedMotionActive, setIsReducedMotionActive] = useState(true);
+  const [isReducedMotionActive, setIsReducedMotionActive] = useState(true); // Default true for server
+  const [isMobileView, setIsMobileView] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
     setIsReducedMotionActive(framerReducedMotion ?? false);
+
+    const checkMobile = () => {
+      setIsMobileView(window.innerWidth < 768); // md breakpoint
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, [framerReducedMotion]);
+
 
   if (!isClient) {
     return (
@@ -99,46 +108,87 @@ export function SkillsSection() {
 
   return (
     <Section id="skills" title="My Tech Toolbox" className="py-20 md:py-28 lg:py-32">
-      <motion.div
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
-        variants={sectionVariants}
-        initial={isReducedMotionActive ? "visible" : "hidden"}
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.1 }}
-      >
-        {skillCategories.map((category) => (
-          <motion.div key={category.name} variants={cardVariants}>
-            <Card className="h-full bg-card/60 backdrop-blur-md border-border/30 shadow-xl hover:shadow-2xl transition-shadow duration-300 flex flex-col">
-              <CardHeader className="pb-4">
-                <div className="flex items-center mb-2">
-                  <category.icon size={28} className="text-primary mr-3" />
-                  <CardTitle className="text-xl gradient-text">{category.name}</CardTitle>
-                </div>
-                <CardDescription className="text-sm text-muted-foreground leading-relaxed">
-                  {category.description}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-2 flex-grow">
-                <motion.div
-                  variants={{
-                    visible: { transition: { staggerChildren: isReducedMotionActive ? 0 : 0.07 } },
-                    hidden: {},
-                  }}
-                  initial={isReducedMotionActive ? "visible" : "hidden"}
-                  whileInView="visible"
-                  viewport={{ once: true, amount: 0.2 }}
-                >
-                  {skillsData
-                    .filter((skill) => skill.category === category.name)
-                    .map((skill) => (
-                      <SkillItem key={skill.id} skill={skill} isReducedMotion={isReducedMotionActive} />
-                    ))}
-                </motion.div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </motion.div>
+      {isMobileView ? (
+        // Mobile View: Accordion
+        <motion.div
+          variants={sectionVariants}
+          initial={isReducedMotionActive ? "visible" : "hidden"}
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.1 }}
+        >
+          <Accordion type="single" collapsible className="w-full space-y-4">
+            {skillCategories.map((category) => (
+              <AccordionItem key={category.name} value={category.name} className="bg-card/60 backdrop-blur-md border-border/30 shadow-lg rounded-lg">
+                <AccordionTrigger className="p-4 hover:no-underline">
+                  <div className="flex items-center">
+                    <category.icon size={24} className="text-primary mr-3" />
+                    <span className="text-lg font-semibold gradient-text">{category.name}</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="p-4 pt-0">
+                  <p className="text-sm text-muted-foreground mb-4">{category.description}</p>
+                  <motion.div
+                    variants={{
+                      visible: { transition: { staggerChildren: isReducedMotionActive ? 0 : 0.07 } },
+                      hidden: {},
+                    }}
+                    initial={isReducedMotionActive ? "visible" : "hidden"}
+                    animate="visible" // Animate when accordion opens
+                  >
+                    {skillsData
+                      .filter((skill) => skill.category === category.name)
+                      .map((skill) => (
+                        <SkillItem key={skill.id} skill={skill} isReducedMotion={isReducedMotionActive} />
+                      ))}
+                  </motion.div>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </motion.div>
+      ) : (
+        // Desktop View: Card-based layout
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
+          variants={sectionVariants}
+          initial={isReducedMotionActive ? "visible" : "hidden"}
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.1 }}
+        >
+          {skillCategories.map((category) => (
+            <motion.div key={category.name} variants={cardVariants}>
+              <Card className="h-full bg-card/60 backdrop-blur-md border-border/30 shadow-xl hover:shadow-2xl transition-shadow duration-300 flex flex-col">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center mb-2">
+                    <category.icon size={28} className="text-primary mr-3" />
+                    <CardTitle className="text-xl gradient-text">{category.name}</CardTitle>
+                  </div>
+                  <CardDescription className="text-sm text-muted-foreground leading-relaxed">
+                    {category.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-2 flex-grow">
+                  <motion.div
+                    variants={{
+                      visible: { transition: { staggerChildren: isReducedMotionActive ? 0 : 0.07 } },
+                      hidden: {},
+                    }}
+                    initial={isReducedMotionActive ? "visible" : "hidden"}
+                    whileInView="visible"
+                    viewport={{ once: true, amount: 0.2 }}
+                  >
+                    {skillsData
+                      .filter((skill) => skill.category === category.name)
+                      .map((skill) => (
+                        <SkillItem key={skill.id} skill={skill} isReducedMotion={isReducedMotionActive} />
+                      ))}
+                  </motion.div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </motion.div>
+      )}
     </Section>
   );
 }
