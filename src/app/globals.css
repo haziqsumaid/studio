@@ -19,8 +19,10 @@ body {
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
+    --popover-rgb: 255, 255, 255; /* Added for hsla usage */
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
+    --primary-rgb: 56, 239, 125; /* Added for #38EF7D in RGB */
     --primary: 145 85% 58%; /* Green gradient middle #38EF7D */
     --primary-foreground: 160 17% 6%; /* Dark text for primary buttons */
     --secondary: 210 40% 96.1%;
@@ -54,8 +56,10 @@ body {
     --foreground: 0 0% 95%; /* Light gray for text #F2F2F2 */
     --card: 160 17% 10%; /* Slightly lighter than background */
     --card-foreground: 0 0% 95%;
+    --popover-rgb: 15, 18, 17; /* Roughly #0F1211 from 160 17% 8% for hsla usage */
     --popover: 160 17% 8%; /* Darker for popovers */
     --popover-foreground: 0 0% 95%;
+    --primary-rgb: 56, 239, 125; /* Added for #38EF7D in RGB */
     --primary: 145 85% 58%; /* Green gradient middle #38EF7D */
     --primary-foreground: 160 17% 6%; /* Dark text for primary buttons */
     --secondary: 160 10% 15%; /* Darker gray for secondary elements */
