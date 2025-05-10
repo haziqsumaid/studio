@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, useAnimation, useReducedMotion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { ChevronDown, type LucideProps, Cpu, Settings, BarChart2, PieChart } from 'lucide-react'; // Added icons for potential future use
+import { ChevronDown, type LucideProps, Cpu, Settings, BarChart2, PieChart } from 'lucide-react';
 import { Section } from '@/components/Section';
 import { Card, CardContent } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -19,10 +19,6 @@ import {
   Radar,
   Tooltip as RechartsTooltip,
   Legend,
-  // BarChart, // Not used in current central radar chart design
-  // XAxis,
-  // YAxis,
-  // Bar,
 } from 'recharts';
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -55,7 +51,7 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, radi
   const y = radius * Math.sin(angle);
 
   const itemVariants = {
-    hidden: { opacity: 0, scale: 0.5, x: 0, y: 0 },
+    hidden: { opacity: 0, scale: 0.5, x: 0, y: 0 }, // x and y are transforms
     visible: {
       opacity: 1,
       scale: 1,
@@ -89,7 +85,7 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, radi
         <TooltipTrigger asChild>
           <motion.div
             ref={ref}
-            className="absolute group"
+            className="absolute group left-1/2 top-1/2" // Added left-1/2 top-1/2 to center the origin for translation
             variants={itemVariants}
             initial={isReducedMotion ? { opacity:1, scale:1, x:x, y:y } : "hidden"}
             animate={controls}
@@ -205,7 +201,7 @@ export function SkillsSection() {
         const containerWidth = galaxyContainerRef.current.offsetWidth;
         // Adjust radius based on container width, ensuring badges orbit around the central radar chart.
         const radarChartDiameterEstimate = Math.min(containerWidth * 0.6, 420); // Estimate radar chart size
-        setGalaxyRadius(Math.max(radarChartDiameterEstimate / 2 + 60, containerWidth * 0.30, 220));
+        setGalaxyRadius(Math.max(radarChartDiameterEstimate / 2 + 80, containerWidth * 0.35, 250)); // Increased spacing slightly
       }
     };
     updateRadius();
@@ -320,11 +316,11 @@ export function SkillsSection() {
               />
               <RechartsTooltip
                 contentStyle={{
-                    backgroundColor: 'hsla(var(--popover-rgb), 0.8)', // Ensure --popover-rgb is defined in globals.css
+                    backgroundColor: 'hsla(var(--popover-rgb), 0.8)', 
                     backdropFilter: 'blur(4px)',
                     border: '1px solid hsl(var(--border))',
                     borderRadius: 'var(--radius)',
-                    boxShadow: '0 4px 12px hsla(var(--primary), 0.1)' // Using --primary instead of --primary-rgb for hsla alpha
+                    boxShadow: '0 4px 12px hsla(var(--primary-rgb, var(--primary)), 0.1)'
                 }}
                 labelStyle={{ color: 'hsl(var(--popover-foreground))', fontWeight: 'bold', marginBottom: '4px' }}
                 itemStyle={{ color: 'hsl(var(--popover-foreground))' }}
@@ -332,9 +328,13 @@ export function SkillsSection() {
               <Legend
                 wrapperStyle={{
                     color: 'hsl(var(--muted-foreground))',
-                    paddingTop: '10px',
-                    fontSize: '12px'
+                    paddingTop: '10px', // Adjusted padding to avoid overlap
+                    fontSize: '12px',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    width: '100%', // Ensure legend takes full width for centering
                 }}
+                align="center" // Center legend items
                 iconSize={10}
                 />
             </MemoizedRadarChart>
@@ -356,3 +356,5 @@ export function SkillsSection() {
     </Section>
   );
 }
+
+    
