@@ -1,15 +1,14 @@
-
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, useAnimation, useReducedMotion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { ChevronDown, type LucideProps, Cpu, Settings, BarChart2, PieChart } from 'lucide-react';
+import { type LucideProps } from 'lucide-react';
 import { Section } from '@/components/Section';
 import { Card, CardContent } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from '@/lib/utils';
-import { skillsData, skillCategories, centralNode as originalCentralNode, type Skill, type SkillCategory } from '@/config/skills';
+import { skillsData, skillCategories, type Skill, type SkillCategory } from '@/config/skills';
 import {
   ResponsiveContainer,
   RadarChart,
@@ -51,10 +50,11 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, radi
   const y = radius * Math.sin(angle);
 
   const itemVariants = {
-    hidden: { opacity: 0, scale: 0.5, x: 0, y: 0 }, // x and y are transforms
+    hidden: { opacity: 0, scale: 0.5, x: 0, y: 0, rotate: 0 },
     visible: {
       opacity: 1,
       scale: 1,
+      rotate: 0, // Explicitly set rotate back to 0
       x: x,
       y: y,
       transition: { type: 'spring', stiffness: 100, damping: 15, delay: index * 0.05 }
@@ -85,9 +85,9 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, radi
         <TooltipTrigger asChild>
           <motion.div
             ref={ref}
-            className="absolute group left-1/2 top-1/2" // Added left-1/2 top-1/2 to center the origin for translation
+            className="absolute group left-1/2 top-1/2" 
             variants={itemVariants}
-            initial={isReducedMotion ? { opacity:1, scale:1, x:x, y:y } : "hidden"}
+            initial={isReducedMotion ? { opacity:1, scale:1, x:x, y:y, rotate:0 } : "hidden"}
             animate={controls}
             whileHover={!isReducedMotion ? {
               scale: 1.2,
@@ -158,7 +158,7 @@ export function SkillsSection() {
   useEffect(() => {
     setIsClient(true);
     setIsReducedMotionActive(framerReducedMotion ?? false);
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    const checkMobile = () => setIsMobile(window.innerWidth < 768); // md breakpoint
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -199,9 +199,8 @@ export function SkillsSection() {
     const updateRadius = () => {
       if (galaxyContainerRef.current) {
         const containerWidth = galaxyContainerRef.current.offsetWidth;
-        // Adjust radius based on container width, ensuring badges orbit around the central radar chart.
-        const radarChartDiameterEstimate = Math.min(containerWidth * 0.6, 420); // Estimate radar chart size
-        setGalaxyRadius(Math.max(radarChartDiameterEstimate / 2 + 80, containerWidth * 0.35, 250)); // Increased spacing slightly
+        const radarChartDiameterEstimate = Math.min(containerWidth * 0.5, 380); // Adjusted estimate for radar chart
+        setGalaxyRadius(Math.max(radarChartDiameterEstimate / 2 + 90, containerWidth * 0.3, 220)); // Adjusted spacing
       }
     };
     updateRadius();
@@ -277,7 +276,7 @@ export function SkillsSection() {
 
       <motion.div
         ref={galaxyContainerRef}
-        className="relative flex items-center justify-center min-h-[450px] sm:min-h-[550px] md:min-h-[650px] lg:min-h-[700px] p-4"
+        className="relative flex items-center justify-center w-full min-h-[450px] sm:min-h-[550px] md:min-h-[650px] lg:min-h-[700px] p-4"
         variants={sectionVariants}
         initial={isReducedMotionActive ? "visible" : "hidden"}
         whileInView="visible"
@@ -328,13 +327,13 @@ export function SkillsSection() {
               <Legend
                 wrapperStyle={{
                     color: 'hsl(var(--muted-foreground))',
-                    paddingTop: '10px', // Adjusted padding to avoid overlap
+                    paddingTop: '10px', 
                     fontSize: '12px',
                     display: 'flex',
                     justifyContent: 'center',
-                    width: '100%', // Ensure legend takes full width for centering
+                    width: '100%', 
                 }}
-                align="center" // Center legend items
+                align="center" 
                 iconSize={10}
                 />
             </MemoizedRadarChart>
@@ -356,5 +355,3 @@ export function SkillsSection() {
     </Section>
   );
 }
-
-    
