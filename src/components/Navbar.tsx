@@ -64,7 +64,7 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2 text-2xl font-bold" onClick={closeMobileMenu}>
             <Terminal size={28} className="text-[hsl(var(--primary))]" />
-            <span className="gradient-text">Your Name</span>
+            <span className="gradient-text">Haziq Sumaid</span>
           </Link>
 
           <nav className="hidden md:flex items-center space-x-1 relative">

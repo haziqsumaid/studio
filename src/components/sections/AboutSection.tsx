@@ -84,7 +84,7 @@ export function AboutSection() {
   });
   const reducedMotion = useReducedMotion();
 
-  const rotateX = useTransform(scrollYProgress, [0, 1], reducedMotion ? 0 : [3, -3]);
+  const rotateX = useTransform(scrollYProgress, [0, 1], reducedMotion ? [0, 0] : [3, -3]);
 
   return (
     <div ref={sectionWrapperRef} className="relative"> {/* Wrapper for ScrollProgressBar context */}

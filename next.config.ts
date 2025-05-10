@@ -5,10 +5,12 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  
   eslint: {
     ignoreDuringBuilds: true,
   },
   images: {
+    domains: ['github-contributions-api.jogruber.de'],
     remotePatterns: [
       {
         protocol: 'https',
