@@ -14,14 +14,19 @@ interface ParticleProps {
 }
 
 const Particle = ({ id, initialX, initialY, size, duration, delay }: ParticleProps) => {
-  const framerReducedMotion = useReducedMotion(); // Original hook call
-  const [isReducedMotionActive, setIsReducedMotionActive] = useState(false);
+  const framerReducedMotion = useReducedMotion();
+  const [isReducedMotionActive, setIsReducedMotionActive] = useState(true); // Default to true for server
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    // Safely set the reduced motion state on the client
+    setIsClient(true);
     setIsReducedMotionActive(framerReducedMotion ?? false);
   }, [framerReducedMotion]);
 
+  if (!isClient) {
+    // Don't render particle div on server or before client-side hydration determines reduced motion
+    return null;
+  }
 
   if (isReducedMotionActive) {
     // Render static particles if reduced motion is enabled
@@ -29,19 +34,19 @@ const Particle = ({ id, initialX, initialY, size, duration, delay }: ParticlePro
       <div
         style={{
           position: 'absolute',
-          left: initialX,
+          left: initialX, // These values are now from client-side Math.random
           top: initialY,
           width: size,
           height: size,
-          backgroundColor: 'hsla(var(--primary), 0.3)', // Use a visible static color
-          borderRadius: '50%', // Simpler shape for static fallback
-          opacity: 0.5, // Ensure it's not too distracting
+          backgroundColor: 'hsla(var(--primary), 0.3)',
+          borderRadius: '50%',
+          opacity: 0.5,
         }}
       />
     );
   }
 
-  // Render animated particles if reduced motion is not enabled
+  // Render animated particles
   return (
     <motion.div
       key={id}
@@ -58,7 +63,7 @@ const Particle = ({ id, initialX, initialY, size, duration, delay }: ParticlePro
       animate={{
         opacity: [0, 0.7, 0],
         scale: [0.5, 1.2, 0.5],
-        x: ['0%', `${Math.random() * 100 - 50}%`, '0%'],
+        x: ['0%', `${Math.random() * 100 - 50}%`, '0%'], // Math.random() is fine here as it's client-only animation
         y: ['0%', `${Math.random() * 100 - 50}%`, '0%'],
       }}
       transition={{
@@ -73,27 +78,28 @@ const Particle = ({ id, initialX, initialY, size, duration, delay }: ParticlePro
 
 export function ParticleBackground() {
   const [particles, setParticles] = useState<ParticleProps[]>([]);
+  const [isClient, setIsClient] = useState(false);
   const numParticles = 20;
 
   useEffect(() => {
+    setIsClient(true);
     const newParticles: ParticleProps[] = [];
-    if (typeof window !== 'undefined') { // Ensure Math.random runs client-side
-      for (let i = 0; i < numParticles; i++) {
-        newParticles.push({
-          id: i,
-          initialX: `${Math.random() * 100}%`,
-          initialY: `${Math.random() * 100}%`,
-          size: Math.random() * 15 + 5,
-          duration: Math.random() * 10 + 10,
-          delay: Math.random() * 5,
-        });
-      }
-      setParticles(newParticles);
+    // Math.random is now only called on the client after mount
+    for (let i = 0; i < numParticles; i++) {
+      newParticles.push({
+        id: i,
+        initialX: `${Math.random() * 100}%`,
+        initialY: `${Math.random() * 100}%`,
+        size: Math.random() * 15 + 5,
+        duration: Math.random() * 10 + 10,
+        delay: Math.random() * 5,
+      });
     }
-  }, []);
+    setParticles(newParticles);
+  }, []); // Empty dependency array ensures this runs once on mount on the client
 
-  // Ensure particles are only rendered on the client after mount to avoid hydration issues
-  if (particles.length === 0) {
+  if (!isClient || particles.length === 0) {
+    // Don't render anything on the server or if particles haven't been initialized
     return null; 
   }
 
@@ -105,3 +111,4 @@ export function ParticleBackground() {
     </div>
   );
 }
+

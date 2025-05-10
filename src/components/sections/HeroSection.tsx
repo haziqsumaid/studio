@@ -24,40 +24,66 @@ export function HeroSection() {
   const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
   const [displayedText, setDisplayedText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  const [isClient, setIsClient] = useState(false);
+  const [heroActualDimensions, setHeroActualDimensions] = useState({ width: 800, height: 600 }); // Default server-side values
+
+  const heroRef = useRef<HTMLElement>(null);
+
+  // Initialize to center of DEFAULT dimensions for server render consistency
+  const mouseX = useMotionValue(heroActualDimensions.width / 2);
+  const mouseY = useMotionValue(heroActualDimensions.height / 2);
+
   const framerReducedMotion = useReducedMotion();
   const [isReducedMotionActive, setIsReducedMotionActive] = useState(false);
 
   useEffect(() => {
+    // This effect runs once on mount on the client
+    setIsClient(true);
     setIsReducedMotionActive(framerReducedMotion ?? false);
-  }, [framerReducedMotion]);
 
-  const mouseX = useMotionValue(typeof window !== 'undefined' ? window.innerWidth / 2 : 0);
-  const mouseY = useMotionValue(typeof window !== 'undefined' ? window.innerHeight / 2 : 0);
-  const heroRef = useRef<HTMLElement>(null);
+    if (heroRef.current) {
+      const rect = heroRef.current.getBoundingClientRect();
+      setHeroActualDimensions({ width: rect.width, height: rect.height });
+      // Set initial mouse position to the center of the actual hero element
+      mouseX.set(rect.width / 2);
+      mouseY.set(rect.height / 2);
+    }
+  }, [framerReducedMotion, mouseX, mouseY]);
 
+  // Mouse move handler effect
   useEffect(() => {
+    if (!isClient || !heroRef.current) return; // Only run on client and if ref is available
+
+    const currentHeroRef = heroRef.current; // Capture for cleanup
     const handleMouseMove = (event: MouseEvent) => {
-      if (heroRef.current) {
-        const rect = heroRef.current.getBoundingClientRect();
-        mouseX.set(event.clientX - rect.left);
-        mouseY.set(event.clientY - rect.top);
-      }
+      const rect = currentHeroRef.getBoundingClientRect(); // Use captured ref's rect
+      mouseX.set(event.clientX - rect.left);
+      mouseY.set(event.clientY - rect.top);
     };
-    const currentHeroRef = heroRef.current;
-    currentHeroRef?.addEventListener('mousemove', handleMouseMove);
-    return () => currentHeroRef?.removeEventListener('mousemove', handleMouseMove);
-  }, [mouseX, mouseY]);
 
-  const rotateX = useTransform(mouseY, [0, typeof window !== 'undefined' ? window.innerHeight : 600], isReducedMotionActive ? [0,0] : [10, -10]);
-  const rotateY = useTransform(mouseX, [0, typeof window !== 'undefined' ? window.innerWidth : 800], isReducedMotionActive ? [0,0] : [-10, 10]);
+    currentHeroRef.addEventListener('mousemove', handleMouseMove);
+    return () => currentHeroRef.removeEventListener('mousemove', handleMouseMove);
+  }, [isClient, mouseX, mouseY]);
 
-  const buttonRotateX = useTransform(mouseY, [0, typeof window !== 'undefined' ? window.innerHeight : 600], isReducedMotionActive ? [0,0] : [5, -5]);
-  const buttonRotateY = useTransform(mouseX, [0, typeof window !== 'undefined' ? window.innerWidth : 800], isReducedMotionActive ? [0,0] : [-5, 5]);
+
+  // Transforms - use heroActualDimensions which is stable on server and updates on client
+  // On server and initial client render, !isClient is true, so config is [0,0] -> no rotation
+  const rotateXConfig = isReducedMotionActive || !isClient ? [0, 0] : [10, -10];
+  const rotateYConfig = isReducedMotionActive || !isClient ? [0, 0] : [-10, 10];
+  const buttonRotateXConfig = isReducedMotionActive || !isClient ? [0, 0] : [5, -5];
+  const buttonRotateYConfig = isReducedMotionActive || !isClient ? [0, 0] : [-5, 5];
+
+  const rotateX = useTransform(mouseY, [0, heroActualDimensions.height], rotateXConfig);
+  const rotateY = useTransform(mouseX, [0, heroActualDimensions.width], rotateYConfig);
+
+  const buttonRotateX = useTransform(mouseY, [0, heroActualDimensions.height], buttonRotateXConfig);
+  const buttonRotateY = useTransform(mouseX, [0, heroActualDimensions.width], buttonRotateYConfig);
 
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
-    if (isReducedMotionActive) {
+    if (!isClient || isReducedMotionActive) { // Also check isClient for typewriter
       setDisplayedText(roles[0]);
       return;
     }
@@ -82,7 +108,7 @@ export function HeroSection() {
       }
     }
     return () => clearTimeout(timeoutId);
-  }, [displayedText, isDeleting, currentRoleIndex, isReducedMotionActive]);
+  }, [displayedText, isDeleting, currentRoleIndex, isReducedMotionActive, isClient]); // Added isClient
 
   const cvButtonVariants = {
     hover: {
@@ -98,11 +124,11 @@ export function HeroSection() {
       boxShadow: "0px 0px 8px hsla(var(--primary), 0.0)",
     }
   };
-  const cvButtonVariantsResolved = isReducedMotionActive ? {} : cvButtonVariants;
+  const cvButtonVariantsResolved = isReducedMotionActive || !isClient ? {} : cvButtonVariants;
 
   return (
     <section ref={heroRef} id="hero" className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden" style={{ perspective: '1000px' }}>
-      <ParticleBackground />
+      {isClient && <ParticleBackground />} {/* Conditionally render ParticleBackground */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
         <motion.div
           style={{
@@ -125,7 +151,7 @@ export function HeroSection() {
         <motion.p
           className={cn(
             "text-xl sm:text-2xl md:text-3xl mb-10 max-w-3xl mx-auto font-mono",
-            "h-16 sm:h-20 md:h-24",
+            "h-16 sm:h-20 md:h-24", // Ensure consistent height for layout
             "flex items-center justify-center"
           )}
           initial={{ opacity: 0 }}
@@ -134,11 +160,14 @@ export function HeroSection() {
           aria-live="polite"
           aria-atomic="true"
         >
-          <GradientText className={!isReducedMotionActive ? "typing-cursor" : ""}>{displayedText}</GradientText>
-          <span className="invisible" aria-hidden="true">&nbsp;</span>
+           {/* Render placeholder or final text if not animating to avoid hydration issues for typewriter */}
+          <GradientText className={isClient && !isReducedMotionActive ? "typing-cursor" : ""}>
+            {isClient ? displayedText : roles[0]}
+          </GradientText>
+          <span className="invisible" aria-hidden="true">&nbsp;</span> {/* Prevents layout shift */}
         </motion.p>
         
-        {!isReducedMotionActive && (
+        {isClient && !isReducedMotionActive && ( // Conditionally render Keyboard
           <motion.div
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -183,7 +212,8 @@ export function HeroSection() {
           </motion.div>
         </motion.div>
       </div>
-      <ScrollPrompt />
+      {isClient && <ScrollPrompt />} {/* Conditionally render ScrollPrompt */}
     </section>
   );
 }
+

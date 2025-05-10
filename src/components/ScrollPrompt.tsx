@@ -6,38 +6,39 @@ import { ChevronDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export function ScrollPrompt() {
-  const [isVisible, setIsVisible] = useState(false); // Start invisible, then fade in
+  const [isVisible, setIsVisible] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const framerReducedMotion = useReducedMotion();
-  const [isReducedMotionActive, setIsReducedMotionActive] = useState(true); // Default to true to avoid flash of animation server-side
+  const [isReducedMotionActive, setIsReducedMotionActive] = useState(true); // Default to true for server
 
   useEffect(() => {
-    // Safely set reduced motion state on client
+    setIsClient(true);
     setIsReducedMotionActive(framerReducedMotion ?? false);
-  }, [framerReducedMotion]);
 
-
-  useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 100) {
         setIsVisible(false);
       } else {
-        setIsVisible(true); // Set to true to allow fade-in animation
+        setIsVisible(true);
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    // Initial check to set visibility for fade-in on load (if not scrolled)
-    // Delay initial visibility slightly to ensure other animations start
+    // Initial check only after client mount
     const timer = setTimeout(() => handleScroll(), 500);
-
+    window.addEventListener('scroll', handleScroll);
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
       clearTimeout(timer);
     };
-  }, []);
+  }, [framerReducedMotion]); // framerReducedMotion ensures re-evaluation when its value is available
 
-  if (isReducedMotionActive || !isVisible) { // Check isVisible for fade out logic
+  if (!isClient) {
+    // Don't render on server or before client-side logic runs
+    return null;
+  }
+
+  if (isReducedMotionActive || !isVisible) {
     return null;
   }
 
@@ -45,9 +46,9 @@ export function ScrollPrompt() {
     <motion.div
       className="absolute bottom-10 left-1/2 -translate-x-1/2"
       initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : -10 }} // Animate opacity based on isVisible
+      animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 10 }}
-      transition={{ delay: isVisible ? 1.5 : 0, duration: 0.5 }} // Delay appearance only if visible
+      transition={{ delay: 1.5, duration: 0.5 }}
     >
       <motion.div
         animate={{ y: [0, 10, 0] }}
@@ -62,3 +63,4 @@ export function ScrollPrompt() {
     </motion.div>
   );
 }
+
