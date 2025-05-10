@@ -13,12 +13,12 @@ interface Particle {
   vy: number; // velocity y
 }
 
-const NUM_PARTICLES = 80; // Increased particle count
+const NUM_PARTICLES = 80; 
 const PARTICLE_COLOR_HSL = "hsl(var(--primary))"; 
 
 export function ParticleBackground() {
   const [particles, setParticles] = useState<Particle[]>([]);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const animationFrameId = useRef<number | null>(null);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
 
@@ -31,7 +31,6 @@ export function ParticleBackground() {
         }
       });
       observer.observe(currentContainer);
-      // Set initial size explicitly after observer is set up
       setContainerSize({ width: currentContainer.offsetWidth, height: currentContainer.offsetHeight });
       return () => {
         observer.disconnect();
@@ -45,7 +44,7 @@ export function ParticleBackground() {
   const initializeParticles = useCallback(() => {
     const { width, height } = containerSize;
     if (width === 0 || height === 0) {
-        setParticles([]); // Clear particles if container has no size
+        setParticles([]); 
         return;
     }
 
@@ -55,17 +54,16 @@ export function ParticleBackground() {
         id: i,
         x: Math.random() * width,
         y: Math.random() * height,
-        size: Math.random() * 2 + 2, // Increased size: 2px to 4px
-        opacity: Math.random() * 0.5 + 0.3, // Increased opacity: 0.3 to 0.8
-        vx: (Math.random() - 0.5) * 0.6, // Increased velocity
-        vy: (Math.random() - 0.5) * 0.6, // Increased velocity
+        size: Math.random() * 2 + 2, 
+        opacity: Math.random() * 0.5 + 0.3, 
+        vx: (Math.random() - 0.5) * 0.6, 
+        vy: (Math.random() - 0.5) * 0.6, 
       });
     }
     setParticles(newParticles);
   }, [containerSize]);
 
   useEffect(() => {
-    // Initialize particles when containerSize is first determined or changes
     initializeParticles();
   }, [initializeParticles]);
 
@@ -86,12 +84,22 @@ export function ParticleBackground() {
           let newX = p.x + p.vx;
           let newY = p.y + p.vy;
 
-          // Wrap particles around the screen edges
-          if (newX + p.size < 0) newX = width + p.size;
-          else if (newX - p.size > width) newX = -p.size;
-          
-          if (newY + p.size < 0) newY = height + p.size;
-          else if (newY - p.size > height) newY = -p.size;
+          // Corrected wrapping logic for centered particles
+          // If particle's right edge (p.x + p.size/2) goes beyond container width
+          if (newX - p.size / 2 > width) {
+            newX = -p.size / 2; // Reappear on the left, with its right edge at 0
+          } 
+          // Else if particle's left edge (p.x - p.size/2) goes before container origin
+          else if (newX + p.size / 2 < 0) {
+            newX = width + p.size / 2; // Reappear on the right, with its left edge at width
+          }
+
+          // Similar for Y
+          if (newY - p.size / 2 > height) {
+            newY = -p.size / 2;
+          } else if (newY + p.size / 2 < 0) {
+            newY = height + p.size / 2;
+          }
 
           return { ...p, x: newX, y: newY };
         })
@@ -99,7 +107,6 @@ export function ParticleBackground() {
       animationFrameId.current = requestAnimationFrame(animateParticles);
     };
 
-    // Start animation only if not already running
     if (!animationFrameId.current) {
         animationFrameId.current = requestAnimationFrame(animateParticles);
     }
@@ -110,7 +117,7 @@ export function ParticleBackground() {
         animationFrameId.current = null; 
       }
     };
-  }, [particles, containerSize]); // Rerun effect if particles or containerSize change
+  }, [particles, containerSize]); 
 
   return (
     <div
@@ -121,7 +128,7 @@ export function ParticleBackground() {
       {particles.map(particle => (
         <div
           key={particle.id}
-          className="rounded-full"
+          className="rounded-full" // Removed border-0 as it was based on a likely incorrect hypothesis
           style={{
             position: 'absolute',
             left: `${particle.x}px`,
@@ -130,11 +137,10 @@ export function ParticleBackground() {
             height: `${particle.size}px`,
             backgroundColor: PARTICLE_COLOR_HSL,
             opacity: particle.opacity,
-            transform: `translate(-50%, -50%)` // Center particle on its x,y coordinates
+            transform: `translate(-50%, -50%)` 
           }}
         />
       ))}
     </div>
   );
 }
-
