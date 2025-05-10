@@ -63,23 +63,23 @@ export interface SkillCategory {
 export type SkillCategoryName = "Backend Development" | "DevOps & Cloud" | "Databases" | "Tools & Technologies" | "Frontend Familiarity";
 
 export const skillCategories: SkillCategory[] = [
-  { 
-    name: "Backend Development", 
+  {
+    name: "Backend Development",
     icon: Server,
     description: "Expertise in building robust and scalable server-side applications."
   },
-  { 
-    name: "DevOps & Cloud", 
+  {
+    name: "DevOps & Cloud",
     icon: Cloud,
     description: "Proficient in automating infrastructure, CI/CD pipelines, and cloud deployments."
   },
-  { 
+  {
     name: "Databases",
     icon: Database,
     description: "Skilled in designing, managing, and optimizing various database systems."
   },
-  { 
-    name: "Tools & Technologies", 
+  {
+    name: "Tools & Technologies",
     icon: Wrench,
     description: "Adept with a wide range of development tools, version control systems, and more."
   },
@@ -207,7 +207,7 @@ export const skillsData: Skill[] = [
    {
     id: 'aws-eks',
     name: 'AWS EKS',
-    icon: Settings, 
+    icon: Settings,
     proficiency: 78,
     experience: '3+ Years',
     category: 'DevOps & Cloud',
@@ -267,13 +267,13 @@ export const skillsData: Skill[] = [
   {
     id: 'nginx',
     name: 'Nginx',
-    icon: Server, 
+    icon: Server,
     proficiency: 82,
     experience: '4+ Years',
     category: 'Tools & Technologies',
     description: 'Configuring and managing Nginx as a reverse proxy, load balancer, and web server.',
   },
-  
+
   // Frontend Familiarity
   {
     id: 'react',

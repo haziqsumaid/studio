@@ -1,8 +1,7 @@
-
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { motion, AnimatePresence, useReducedMotion, useAnimation, useSpring } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion, useAnimation } from 'framer-motion';
 import { Section } from '@/components/Section';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -28,12 +27,12 @@ interface SkillBadgeProps {
 }
 
 const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, radius, centerOffset = {x:0, y:0}, onHover, isReducedMotion, theme }) => {
-  const angle = (index / totalSkills) * 2 * Math.PI - Math.PI / 2; 
+  const angle = (index / totalSkills) * 2 * Math.PI - Math.PI / 2;
   const finalX = radius * Math.cos(angle) + centerOffset.x;
   const finalY = radius * Math.sin(angle) + centerOffset.y;
-  
-  const initialOrbitRadius = radius * 0.3; 
-  const initialAngle = angle + Math.PI / 4; 
+
+  const initialOrbitRadius = radius * 0.3;
+  const initialAngle = angle + Math.PI / 4;
   const entryX = initialOrbitRadius * Math.cos(initialAngle) + centerOffset.x;
   const entryY = initialOrbitRadius * Math.sin(initialAngle) + centerOffset.y;
 
@@ -44,7 +43,7 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, radi
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && entry.boundingClientRect.top > 0) { 
+        if (entry.isIntersecting && entry.boundingClientRect.top > 0) {
           setIsIntersecting(true);
           controls.start("visible");
           observer.unobserve(entry.target);
@@ -57,7 +56,7 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, radi
     if (currentRef) {
       observer.observe(currentRef);
     }
-    
+
     return () => {
       if (currentRef) {
         observer.unobserve(currentRef);
@@ -66,32 +65,31 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, radi
   }, [controls]);
 
   const badgeVariants = {
-    initial: { 
-      opacity: 0, 
-      scale: 0.3, 
-      x: entryX, 
-      y: entryY,
+    initial: {
+      opacity: 0,
+      scale: 0.3,
+      x: isReducedMotion ? finalX : entryX, // Use finalX/Y if reduced motion
+      y: isReducedMotion ? finalY : entryY,
       rotate: isReducedMotion ? 0 : (Math.random() - 0.5) * 45
     },
     visible: {
       opacity: 1,
-      scale: 1, // Ensure target scale is 1
+      scale: 1,
       x: finalX,
       y: finalY,
       rotate: 0,
       transition: { type: 'spring', damping: 15, stiffness: 80, delay: isReducedMotion ? 0 : index * 0.07 + 0.3 },
     },
     hover: {
-      scale: 1.25,
+      scale: 1.25, // Keep scale on hover
       zIndex: 10,
       boxShadow: `0 0 20px 5px hsla(var(--primary), 0.5)`,
-      // Transition for hover state itself is fine
     },
   };
-  
+
   const progressRingVariants = {
-    hidden: { strokeDashoffset: 2 * Math.PI * 28 }, 
-    visible: { 
+    hidden: { strokeDashoffset: 2 * Math.PI * 28 },
+    visible: {
       strokeDashoffset: 2 * Math.PI * 28 * (1 - skill.proficiency / 100),
       transition: { duration: isReducedMotion ? 0 : 1, ease: "easeOut", delay: isReducedMotion ? 0 : index * 0.07 + 0.8 }
     }
@@ -109,9 +107,8 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, radi
       whileHover="hover"
       onHoverStart={() => onHover(skill)}
       onHoverEnd={() => onHover(null)}
-      // Add a default transition to govern animations back from hover to visible state
-      transition={{ type: "spring", stiffness: 150, damping: 20 }}
-      style={{ width: 72, height: 72 }} 
+      transition={{ type: "spring", stiffness: 150, damping: 20 }} // Governs return from hover
+      style={{ width: 72, height: 72 }}
       role="button"
       tabIndex={0}
       aria-label={`${skill.name} - ${skill.experience} experience, ${skill.proficiency}% proficiency`}
@@ -175,17 +172,14 @@ const SkillGalaxy: React.FC<{
   theme: string | undefined;
 }> = ({ skills, categories, onSkillHover, isReducedMotion, theme }) => {
   const [containerSize, setContainerSize] = useState({ width: 500, height: 500 });
-  const galaxyRef = useRef<HTMLDivElement>(null); // Ref for the galaxy container (badges orbit around this)
-  const radarChartContainerRef = useRef<HTMLDivElement>(null); // Ref for the radar chart's direct parent
+  const galaxyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const updateSize = () => {
       if (galaxyRef.current) {
         const { clientWidth, clientHeight } = galaxyRef.current;
-        // Use the larger dimension for radius calculation to ensure badges fit well
-        const largerDim = Math.max(clientWidth, clientHeight); 
-        const effectiveSize = Math.max(largerDim, 400); // Minimum effective size
-        setContainerSize({ width: effectiveSize * 0.95, height: effectiveSize * 0.95 });
+        const effectiveSize = Math.max(Math.min(clientWidth, clientHeight), 400); // Ensure a minimum size
+        setContainerSize({ width: effectiveSize, height: effectiveSize });
       }
     };
     updateSize();
@@ -193,9 +187,9 @@ const SkillGalaxy: React.FC<{
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
-  // Radius for skill badges, relative to the galaxy container size
-  const radius = Math.min(containerSize.width, containerSize.height) * 0.38; // Adjusted for better spacing with central chart
-  const centerOffset = { x: 0, y: 0 }; 
+  // Increase the radius multiplier for a larger galaxy
+  const radius = Math.min(containerSize.width, containerSize.height) * 0.45; // Increased from 0.38
+  const centerOffset = { x: 0, y: 0 };
 
   const radarChartData = useMemo(() => {
     return categories.map(category => {
@@ -205,43 +199,40 @@ const SkillGalaxy: React.FC<{
         : 0;
       return {
         subject: category.name,
-        A: Math.max(10, avgProficiency), 
+        A: Math.max(10, avgProficiency),
         fullMark: 100,
       };
     });
   }, [skills, categories]);
 
   return (
-    // Main container for the entire galaxy and chart area
     <div ref={galaxyRef} className="w-full h-full relative flex items-center justify-center">
-      {/* Radar Chart Container - positioned absolutely in the center of galaxyRef */}
       <motion.div
-        ref={radarChartContainerRef}
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0" // Centering the chart container
-        style={{ width: '55%', height: '55%' }} // Explicit size for the chart container
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0"
+        style={{ width: '60%', height: '60%' }} // Adjusted size of radar chart container
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1, transition: { delay: isReducedMotion ? 0 : 0.5, duration: 0.8, ease: "circOut" } }}
       >
         <ResponsiveContainer width="100%" height="100%">
-          <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarChartData}> {/* outerRadius relative to its container */}
+          <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarChartData}>
             <PolarGrid stroke={theme === 'dark' ? "hsl(var(--border)/0.3)" : "hsl(var(--muted)/0.5)"} />
-            <PolarAngleAxis 
-              dataKey="subject" 
-              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }} 
+            <PolarAngleAxis
+              dataKey="subject"
+              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 9 }} // Smaller font size
             />
-            <PolarRadiusAxis 
-              angle={30} 
-              domain={[0, 100]} 
+            <PolarRadiusAxis
+              angle={30}
+              domain={[0, 100]}
               tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 8 }}
               axisLine={{ stroke: theme === 'dark' ? "hsl(var(--border)/0.2)" : "hsl(var(--muted)/0.4)" }}
               tickLine={{ stroke: theme === 'dark' ? "hsl(var(--border)/0.2)" : "hsl(var(--muted)/0.4)" }}
             />
-            <Radar 
-              name="Avg Proficiency" 
-              dataKey="A" 
-              stroke="hsl(var(--primary))" 
-              fill="hsl(var(--primary))" 
-              fillOpacity={0.4} 
+            <Radar
+              name="Avg Proficiency"
+              dataKey="A"
+              stroke="hsl(var(--primary))"
+              fill="hsl(var(--primary))"
+              fillOpacity={0.4}
               strokeWidth={1.5}
             />
             <RechartsTooltip
@@ -250,29 +241,29 @@ const SkillGalaxy: React.FC<{
                 border: '1px solid hsl(var(--border))',
                 borderRadius: 'var(--radius)',
                 color: 'hsl(var(--popover-foreground))',
-                fontSize: '12px',
+                fontSize: '10px', // Smaller font size
                 boxShadow: 'var(--shadow-md)'
               }}
               itemStyle={{ color: 'hsl(var(--popover-foreground))' }}
               labelStyle={{ color: 'hsl(var(--gradient-middle))', fontWeight: 'bold' }}
               cursor={{ fill: 'hsla(var(--primary-rgb), 0.1)' }}
+              wrapperStyle={{ zIndex: 50 }} // Ensure tooltip is above badges
             />
           </RadarChart>
         </ResponsiveContainer>
       </motion.div>
 
-      {/* Skill Badges Orbiting - positioned relative to galaxyRef */}
       {skills.map((skill, index) => (
         <SkillBadge
           key={skill.id}
           skill={skill}
           index={index}
           totalSkills={skills.length}
-          radius={radius} // Use the calculated radius
-          centerOffset={centerOffset} // Badges orbit the center of galaxyRef
+          radius={radius}
+          centerOffset={centerOffset}
           onHover={onSkillHover}
           isReducedMotion={isReducedMotion}
-          isSelected={false} 
+          isSelected={false}
           theme={theme}
         />
       ))}
@@ -285,15 +276,15 @@ export function SkillsSection() {
   const [activeSkill, setActiveSkill] = useState<Skill | null>(null);
   const [isClient, setIsClient] = useState(false);
   const framerReducedMotion = useReducedMotion();
-  const [isReducedMotionActive, setIsReducedMotionActive] = useState(true); 
+  const [isReducedMotionActive, setIsReducedMotionActive] = useState(true);
   const [isMobileView, setIsMobileView] = useState(false);
-  const { theme } = useTheme(); 
+  const { theme } = useTheme();
 
   useEffect(() => {
     setIsClient(true);
     setIsReducedMotionActive(framerReducedMotion ?? false);
 
-    const checkMobile = () => setIsMobileView(window.innerWidth < 768); 
+    const checkMobile = () => setIsMobileView(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -405,7 +396,7 @@ export function SkillsSection() {
               )}
             </AnimatePresence>
 
-          <div className="relative w-full max-w-2xl lg:max-w-3xl xl:max-w-4xl aspect-square mx-auto mt-10 md:mt-16 lg:mt-20">
+          <div className="relative w-full max-w-3xl lg:max-w-4xl xl:max-w-5xl aspect-square mx-auto mt-10 md:mt-16 lg:mt-20"> {/* Increased max-width */}
              <SkillGalaxy
                 skills={skillsData}
                 categories={skillCategories}
@@ -420,5 +411,3 @@ export function SkillsSection() {
     </Section>
   );
 }
-
-    
