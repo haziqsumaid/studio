@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules # Don't mount node_modules from host
+      - /app/.next
+    environment:
+      NODE_ENV: development
+      # Add any other environment variables needed for local development
+      # NEXT_PUBLIC_SITE_URL: http://localhost:3000
+    # command: npm run dev # Or yarn dev, pnpm dev
+    # For Next.js 13+ App Router with Turbopack, you might need:
+    # command: npm run dev -- --turbo

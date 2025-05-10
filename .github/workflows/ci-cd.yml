@@ -1,0 +1,64 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm' # or 'yarn', 'pnpm'
+
+    - name: Install dependencies
+      run: |
+        if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
+        elif [ -f package-lock.json ]; then npm ci; \
+        elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && pnpm i --frozen-lockfile; \
+        else echo "Lockfile not found." && exit 1; \
+        fi
+
+    - name: Run linters and type checks
+      run: |
+        if [ -f yarn.lock ]; then yarn lint && yarn typecheck; \
+        elif [ -f package-lock.json ]; then npm run lint && npm run typecheck; \
+        elif [ -f pnpm-lock.yaml ]; then pnpm run lint && pnpm run typecheck; \
+        else echo "Lockfile not found." && exit 1; \
+        fi
+      # Add tests if you have them: npm test or yarn test
+
+    - name: Build project
+      run: |
+        if [ -f yarn.lock ]; then yarn build; \
+        elif [ -f package-lock.json ]; then npm run build; \
+        elif [ -f pnpm-lock.yaml ]; then pnpm run build; \
+        else echo "Lockfile not found." && exit 1; \
+        fi
+      env:
+        NEXT_TELEMETRY_DISABLED: 1 # Disable telemetry during build
+
+  # Placeholder for deployment job
+  # deploy:
+  #   needs: build-and-test
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' # Only deploy from main/master
+  #   steps:
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v3
+  #   # Add your deployment steps here (e.g., to Vercel, Netlify, AWS, Docker Hub)
+  #   - name: Example Deploy to Vercel
+  #     run: echo "Deploying to Vercel..." # Replace with actual Vercel CLI commands or GitHub Action
