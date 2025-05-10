@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -150,7 +149,8 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, radi
   );
 };
 
-const MemoizedResponsiveContainer = React.memo(ResponsiveContainer);
+const MemoizedBarChart = React.memo(BarChart);
+const MemoizedRadarChart = React.memo(RadarChart);
 
 
 export function SkillsSection() {
@@ -251,7 +251,7 @@ export function SkillsSection() {
                             initial={{width:0}}
                             whileInView={{width: `${skill.proficiency}%`}}
                             viewport={{once: true, amount: 0.8}}
-                            transition={{duration: isReducedMotion ? 0: 0.5, ease: 'easeOut'}}
+                            transition={{duration: reducedMotion ? 0: 0.5, ease: 'easeOut'}}
                             />
                         </div>
                       </Card>
@@ -360,8 +360,8 @@ export function SkillsSection() {
                     {activeChartTab === 'bar' && (
                       <div style={{ width: '100%', height: 400 }}>
                         <h3 className="text-lg font-semibold text-foreground mb-2">Skill Proficiency (Bar)</h3>
-                         <MemoizedResponsiveContainer width="100%" height="100%">
-                           <BarChart data={chartData}>
+                         <ResponsiveContainer width="100%" height="100%">
+                           <MemoizedBarChart width={500} height={300} data={chartData}> {/* Using MemoizedBarChart */}
                               <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? "hsl(var(--border))" : "hsl(var(--muted))"} />
                               <XAxis dataKey="name" angle={-30} textAnchor="end" height={70} interval={0} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }} />
                               <YAxis tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
@@ -372,15 +372,15 @@ export function SkillsSection() {
                               />
                               <Legend wrapperStyle={{ color: 'hsl(var(--muted-foreground))' }}/>
                               <Bar dataKey="Proficiency" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                           </BarChart>
-                        </MemoizedResponsiveContainer>
+                           </MemoizedBarChart>
+                        </ResponsiveContainer>
                       </div>
                     )}
                     {activeChartTab === 'radar' && (
                       <div style={{ width: '100%', height: 400 }}>
                         <h3 className="text-lg font-semibold text-foreground mb-2">Category Proficiency (Radar)</h3>
-                        <MemoizedResponsiveContainer width="100%" height="100%">
-                          <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarChartData}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <MemoizedRadarChart cx="50%" cy="50%" outerRadius="80%" data={radarChartData}> {/* Using MemoizedRadarChart */}
                             <PolarGrid stroke={theme === 'dark' ? "hsl(var(--border))" : "hsl(var(--muted))"}/>
                             <PolarAngleAxis dataKey="subject" tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
                             <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}/>
@@ -391,8 +391,8 @@ export function SkillsSection() {
                                   itemStyle={{ color: 'hsl(var(--popover-foreground))' }}
                               />
                             <Legend wrapperStyle={{ color: 'hsl(var(--muted-foreground))' }}/>
-                          </RadarChart>
-                        </MemoizedResponsiveContainer>
+                          </MemoizedRadarChart>
+                        </ResponsiveContainer>
                       </div>
                     )}
                   </div>
@@ -405,4 +405,3 @@ export function SkillsSection() {
     </Section>
   );
 }
-
