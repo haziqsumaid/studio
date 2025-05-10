@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,6 +20,9 @@ import { Section } from '@/components/Section';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Github, Linkedin, Twitter, Send } from 'lucide-react';
 import Link from "next/link";
+import { motion, useReducedMotion } from "framer-motion";
+import { useEffect, useState } from 'react';
+
 
 const contactFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -27,6 +31,21 @@ const contactFormSchema = z.object({
 });
 
 type ContactFormValues = z.infer<typeof contactFormSchema>;
+
+const iconHoverVariants = {
+  hover: {
+    scale: 1.2,
+    color: "hsl(var(--primary))",
+    backgroundColor: "hsla(var(--accent-rgb), 0.2)",
+    transition: { type: "spring", stiffness: 300 }
+  },
+  initial: {
+    scale: 1,
+    color: "hsl(var(--muted-foreground))",
+    backgroundColor: "transparent",
+  }
+};
+
 
 export function ContactSection() {
   const { toast } = useToast();
@@ -38,6 +57,15 @@ export function ContactSection() {
       message: "",
     },
   });
+
+  const framerReducedMotion = useReducedMotion();
+  const [isReducedMotionActive, setIsReducedMotionActive] = useState(false);
+
+  useEffect(() => {
+    setIsReducedMotionActive(framerReducedMotion ?? false);
+  }, [framerReducedMotion]);
+
+  const variants = isReducedMotionActive ? {} : iconHoverVariants;
 
   async function onSubmit(data: ContactFormValues) {
     try {
@@ -117,7 +145,7 @@ export function ContactSection() {
                   )}
                 />
                 <Button type="submit" className="w-full gradient-button" disabled={form.formState.isSubmitting}>
-                  {form.formState.isSubmitting ? "Sending..." : <>Send Message <Send size={18} className="ml-2"/></>}
+                  {form.formState.isSubmitting ? "Sending..." : <><Send size={18} className="mr-2"/>Send Message</>}
                 </Button>
               </form>
             </Form>
@@ -131,16 +159,22 @@ export function ContactSection() {
           </div>
           <div>
             <h3 className="text-2xl font-semibold text-foreground mb-4">Connect With Me</h3>
-            <div className="flex space-x-6">
-              <Link href="https://github.com/yourusername" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:gradient-text transition-colors p-2 rounded-full hover:bg-accent/20">
-                <Github size={32} /> <span className="sr-only">GitHub</span>
-              </Link>
-              <Link href="https://linkedin.com/in/yourusername" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:gradient-text transition-colors p-2 rounded-full hover:bg-accent/20">
-                <Linkedin size={32} /> <span className="sr-only">LinkedIn</span>
-              </Link>
-              <Link href="https://twitter.com/yourusername" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:gradient-text transition-colors p-2 rounded-full hover:bg-accent/20">
-                <Twitter size={32} /> <span className="sr-only">Twitter</span>
-              </Link>
+            <div className="flex space-x-4">
+              <motion.div initial="initial" whileHover="hover" variants={variants} className="p-2 rounded-full">
+                <Link href="https://github.com/yourusername" target="_blank" rel="noopener noreferrer" >
+                  <Github size={32} /> <span className="sr-only">GitHub</span>
+                </Link>
+              </motion.div>
+              <motion.div initial="initial" whileHover="hover" variants={variants} className="p-2 rounded-full">
+                <Link href="https://linkedin.com/in/yourusername" target="_blank" rel="noopener noreferrer" >
+                  <Linkedin size={32} /> <span className="sr-only">LinkedIn</span>
+                </Link>
+              </motion.div>
+              <motion.div initial="initial" whileHover="hover" variants={variants} className="p-2 rounded-full">
+                <Link href="https://twitter.com/yourusername" target="_blank" rel="noopener noreferrer" >
+                  <Twitter size={32} /> <span className="sr-only">Twitter</span>
+                </Link>
+              </motion.div>
             </div>
           </div>
         </div>

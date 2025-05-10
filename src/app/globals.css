@@ -15,6 +15,7 @@ body {
 
 @layer base {
   :root {
+    --background-rgb: 255, 255, 255; /* For hsla(var(--background-rgb), opacity) */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
@@ -27,6 +28,7 @@ body {
     --secondary-foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
+    --accent-rgb: 189, 189, 189; /* For hsla(var(--accent-rgb), opacity) */
     --accent: 0 0% 74%; /* Gray #BDBDBD */
     --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
@@ -48,6 +50,7 @@ body {
   }
 
   .dark {
+    --background-rgb: 10, 15, 13; /* #0A0F0D in RGB */
     --background: 160 17% 6%; /* Dark mode base #0A0F0D */
     --foreground: 0 0% 95%; /* Light gray for text #F2F2F2 */
     --card: 160 17% 10%; /* Slightly lighter than background */
@@ -60,6 +63,7 @@ body {
     --secondary-foreground: 0 0% 95%;
     --muted: 160 10% 20%; /* Muted backgrounds */
     --muted-foreground: 0 0% 60%; /* Muted text #999999 */
+    --accent-rgb: 189, 189, 189; /* Gray #BDBDBD in RGB */
     --accent: 0 0% 74%; /* Gray #BDBDBD */
     --accent-foreground: 160 17% 6%; /* Dark text for accent elements */
     --destructive: 0 62.8% 30.6%;
@@ -83,6 +87,12 @@ body {
   body {
     @apply bg-background text-foreground;
     scroll-behavior: smooth;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  html:not(.dark) {
+    color-scheme: light;
   }
 }
 
@@ -109,19 +119,16 @@ body {
 
 .typing-cursor::after {
   content: '|';
-  animation: blink 1s step-end infinite;
+  animation: blink 0.7s step-end infinite; /* Adjusted speed */
   margin-left: 0.125em; /* Adjust spacing as needed */
   @apply text-[hsl(var(--primary))]; /* Cursor color matching primary/gradient */
 }
 
 @keyframes blink {
   from, to { 
-    /* In dark mode, a transparent cursor against gradient text might not be ideal.
-       Let's try making it match the gradient's approximate color or a visible accent.
-    */
-    color: transparent; /* Effectively invisible */
+    color: transparent; 
   }
   50% { 
-    color: inherit; /* Inherits from .gradient-text, or use a specific color like hsl(var(--primary)) */
+    color: inherit; 
   }
 }
