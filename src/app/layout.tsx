@@ -61,7 +61,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning> {/* suppressHydrationWarning for next-themes or manual theme management */}
+    <html lang="en" suppressHydrationWarning>
       <body className={cn('antialiased bg-background text-foreground font-sans')}>
         <ThemeProvider>
           <MotionConfig reducedMotion="user">
