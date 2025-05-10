@@ -13,7 +13,7 @@ interface Particle {
   vy: number; // velocity y
 }
 
-const NUM_PARTICLES = 50; // Increased for better visibility
+const NUM_PARTICLES = 80; // Increased particle count
 const PARTICLE_COLOR_HSL = "hsl(var(--primary))"; 
 
 export function ParticleBackground() {
@@ -55,10 +55,10 @@ export function ParticleBackground() {
         id: i,
         x: Math.random() * width,
         y: Math.random() * height,
-        size: Math.random() * 2 + 1, 
-        opacity: Math.random() * 0.4 + 0.1, // Slightly increased opacity for better visibility
-        vx: (Math.random() - 0.5) * 0.2, 
-        vy: (Math.random() - 0.5) * 0.2,
+        size: Math.random() * 2 + 2, // Increased size: 2px to 4px
+        opacity: Math.random() * 0.5 + 0.3, // Increased opacity: 0.3 to 0.8
+        vx: (Math.random() - 0.5) * 0.6, // Increased velocity
+        vy: (Math.random() - 0.5) * 0.6, // Increased velocity
       });
     }
     setParticles(newParticles);
@@ -136,3 +136,4 @@ export function ParticleBackground() {
     </div>
   );
 }
+
