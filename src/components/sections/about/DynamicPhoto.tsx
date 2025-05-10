@@ -1,7 +1,7 @@
 "use client";
 
 import Image from 'next/image';
-import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from 'framer-motion';
+import { motion, useMotionValue, useReducedMotion, useSpring, useTransform, useAnimation } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -15,6 +15,8 @@ export function DynamicPhoto({ src, alt, className }: DynamicPhotoProps) {
   const [isRevealed, setIsRevealed] = useState(false);
   const photoRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
+  const ringControls = useAnimation();
+  const photoControls = useAnimation();
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -44,9 +46,14 @@ export function DynamicPhoto({ src, alt, className }: DynamicPhotoProps) {
     currentRef.addEventListener('mouseleave', handleMouseLeave);
 
     const observer = new IntersectionObserver(
-      ([entry]) => {
+      async ([entry]) => {
         if (entry.isIntersecting) {
           setIsRevealed(true);
+          await ringControls.start("animate"); 
+          await photoControls.start("animate"); 
+          if (!reducedMotion) {
+             ringControls.start("pulse"); 
+          }
           observer.unobserve(entry.target);
         }
       },
@@ -58,8 +65,10 @@ export function DynamicPhoto({ src, alt, className }: DynamicPhotoProps) {
       currentRef?.removeEventListener('mousemove', handleMouseMove);
       currentRef?.removeEventListener('mouseleave', handleMouseLeave);
       observer.disconnect();
+      ringControls.stop();
+      photoControls.stop();
     };
-  }, [mouseX, mouseY]);
+  }, [mouseX, mouseY, ringControls, photoControls, reducedMotion]);
 
   const glintX = useTransform(smoothMouseX, [-150, 150], ['20%', '80%']);
   const glintY = useTransform(smoothMouseY, [-150, 150], ['20%', '80%']);
@@ -68,23 +77,29 @@ export function DynamicPhoto({ src, alt, className }: DynamicPhotoProps) {
     initial: {
       pathLength: 0,
       opacity: 0,
-      strokeDasharray: "0 1",
-      strokeDashoffset: reducedMotion ? 0 : 1,
     },
     animate: {
       pathLength: 1,
       opacity: 1,
-      strokeDasharray: "1 1",
-      strokeDashoffset: 0,
       transition: { duration: 1, ease: "circOut", delay: 0.2 },
     },
+    pulse: { 
+      scale: [1, 1.03, 1],
+      opacity: [0.7, 1, 0.7],
+      transition: {
+        duration: 2.5,
+        ease: "easeInOut",
+        repeat: Infinity,
+        repeatDelay: 1,
+      }
+    }
   };
 
   const photoMaskVariants = {
-    initial: { clipPath: reducedMotion ? "circle(100% at 50% 50%)" : "circle(0% at 0% 50%)" },
+    initial: { clipPath: reducedMotion ? "inset(0% 0% 0% 0%)" : "inset(0% 100% 0% 0%)" },
     animate: { 
-      clipPath: "circle(150% at 50% 50%)", // Ensure full coverage
-      transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1], delay: reducedMotion ? 0 : 0.8 }
+      clipPath: "inset(0% 0% 0% 0%)",
+      transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1], delay: reducedMotion ? 0 : 0.5 }
     },
   };
 
@@ -96,7 +111,6 @@ export function DynamicPhoto({ src, alt, className }: DynamicPhotoProps) {
         className
       )}
     >
-      {/* Animated Border Ring */}
       <motion.svg
         className="absolute inset-0 w-full h-full"
         viewBox="0 0 100 100"
@@ -111,7 +125,7 @@ export function DynamicPhoto({ src, alt, className }: DynamicPhotoProps) {
           strokeWidth="3"
           variants={ringVariants}
           initial="initial"
-          animate={isRevealed ? "animate" : "initial"}
+          animate={ringControls}
         />
         <defs>
           <linearGradient id="gradient-border" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -122,23 +136,21 @@ export function DynamicPhoto({ src, alt, className }: DynamicPhotoProps) {
         </defs>
       </motion.svg>
 
-      {/* Photo with reveal animation */}
       <motion.div
         className="w-full h-full rounded-full overflow-hidden relative"
         variants={photoMaskVariants}
         initial="initial"
-        animate={isRevealed ? "animate" : "initial"}
+        animate={photoControls}
       >
         <Image
           src={src}
           alt={alt}
           layout="fill"
           objectFit="cover"
-          className="transform scale-105" // Slight zoom for better reveal
+          className="transform scale-105"
           data-ai-hint="professional portrait"
           priority
         />
-        {/* Parallax Glint Effect */}
         {!reducedMotion && isRevealed && (
             <motion.div
                 className="absolute inset-0 rounded-full pointer-events-none"

@@ -8,7 +8,6 @@ import { Briefcase, GitMerge, Users, Type, Container, Cloud, Cpu, Database, Shop
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 
-// Re-defined or ensure access if it's from elsewhere
 const DatabaseIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
@@ -37,16 +36,16 @@ const ApiIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 
 const skillsData: Skill[] = [
-  { id: 'ts', name: 'TypeScript', icon: <Type size={24} />, proficiency: 90 },
-  { id: 'nodejs', name: 'Node.js', icon: <Zap size={24} />, proficiency: 95 },
-  { id: 'express', name: 'Express.js', icon: <Code size={24} />, proficiency: 90 },
-  { id: 'docker', name: 'Docker', icon: <Container size={24} />, proficiency: 85 },
-  { id: 'cicd', name: 'CI/CD', icon: <GitMerge size={24} />, proficiency: 80 },
-  { id: 'aws', name: 'AWS', icon: <Cloud size={24} />, proficiency: 75 },
-  { id: 'devops', name: 'DevOps', icon: <Cpu size={24} />, proficiency: 80 },
-  { id: 'api', name: 'API Design', icon: <ApiIcon size={24} />, proficiency: 95 },
-  { id: 'mongodb', name: 'MongoDB', icon: <DatabaseIcon size={24} />, proficiency: 85 },
-  { id: 'genai', name: 'Generative AI', icon: <Brain size={24} />, proficiency: 70 },
+  { id: 'ts', name: 'TypeScript', icon: <Type size={24} />, proficiency: 90, yearsOfExperience: "5+ Years" },
+  { id: 'nodejs', name: 'Node.js', icon: <Zap size={24} />, proficiency: 95, yearsOfExperience: "6+ Years" },
+  { id: 'express', name: 'Express.js', icon: <Code size={24} />, proficiency: 90, yearsOfExperience: "6+ Years" },
+  { id: 'docker', name: 'Docker', icon: <Container size={24} />, proficiency: 85, yearsOfExperience: "4+ Years" },
+  { id: 'cicd', name: 'CI/CD', icon: <GitMerge size={24} />, proficiency: 80, yearsOfExperience: "4+ Years" },
+  { id: 'aws', name: 'AWS', icon: <Cloud size={24} />, proficiency: 75, yearsOfExperience: "3+ Years" },
+  { id: 'devops', name: 'DevOps', icon: <Cpu size={24} />, proficiency: 80, yearsOfExperience: "5+ Years" },
+  { id: 'api', name: 'API Design', icon: <ApiIcon size={24} />, proficiency: 95, yearsOfExperience: "6+ Years" },
+  { id: 'mongodb', name: 'MongoDB', icon: <DatabaseIcon size={24} />, proficiency: 85, yearsOfExperience: "5+ Years" },
+  { id: 'genai', name: 'Generative AI', icon: <Brain size={24} />, proficiency: 70, yearsOfExperience: "1+ Year" },
 ];
 
 const journeyMilestones: Milestone[] = [
@@ -92,7 +91,8 @@ const sectionVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.3,
+      staggerChildren: 0.2,
+      delayChildren: 0.1,
     },
   },
 };
@@ -107,7 +107,7 @@ const itemVariants = {
     opacity: 1,
     x: 0,
     y: 0,
-    transition: { type: 'spring', stiffness: 50, damping: 15 },
+    transition: { type: 'spring', stiffness: 60, damping: 15 },
   },
 };
 
@@ -119,46 +119,50 @@ export function AboutSection() {
   });
   const reducedMotion = useReducedMotion();
 
-  const rotateX = useTransform(scrollYProgress, [0, 1], reducedMotion ? [0, 0] : [5, -5]); // Tilt effect
+  const rotateX = useTransform(scrollYProgress, [0, 1], reducedMotion ? 0 : [5, -5]);
 
   return (
     <Section id="about" ref={sectionRef} className="overflow-hidden">
       <motion.div
-        style={{ perspective: '1000px' }} // Needed for 3D transforms
+        style={{ perspective: '1000px' }} 
       >
         <motion.div
-          style={{ rotateX: rotateX }} // Apply tilt to this inner container
+          style={{ rotateX: reducedMotion ? 0 : rotateX }} 
           variants={sectionVariants}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.1 }}
+          viewport={{ once: true, amount: 0.05 }} 
           className="bg-card/30 backdrop-blur-lg p-6 md:p-10 rounded-xl shadow-2xl border border-border/20"
         >
           <motion.h2
             variants={itemVariants}
-            custom="top"
+            custom="top" 
             className="text-3xl md:text-4xl font-bold mb-12 text-center gradient-text"
           >
             A Bit About My Journey
           </motion.h2>
 
-          <motion.div
-            variants={itemVariants}
-            custom="left"
-            className="grid md:grid-cols-12 gap-8 md:gap-12 items-start mb-16"
-          >
-            <div className="md:col-span-4 flex justify-center items-center">
+          <div className="grid md:grid-cols-12 gap-8 md:gap-12 items-start mb-16">
+            <motion.div
+              variants={itemVariants}
+              custom="left" 
+              className="md:col-span-4 flex justify-center items-center"
+            >
               <DynamicPhoto
-                src="https://picsum.photos/id/1005/400/400" // Replace with your professional photo
+                src="https://picsum.photos/id/1005/400/400" 
                 alt="Your Name - Professional Portrait"
               />
-            </div>
-            <div className="md:col-span-8">
+            </motion.div>
+            <motion.div
+              variants={itemVariants}
+              custom="right" 
+              className="md:col-span-8"
+            >
               <JourneyTimeline milestones={journeyMilestones} />
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
 
-          <motion.div variants={itemVariants} custom="bottom">
+          <motion.div variants={itemVariants} custom="bottom"> 
             <SkillUniverse skills={skillsData} />
           </motion.div>
         </motion.div>
