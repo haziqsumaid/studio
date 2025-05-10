@@ -150,8 +150,7 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, radi
   );
 };
 
-const MemoizedBarChart = React.memo(ResponsiveContainer);
-const MemoizedRadarChart = React.memo(ResponsiveContainer);
+const MemoizedResponsiveContainer = React.memo(ResponsiveContainer);
 
 
 export function SkillsSection() {
@@ -361,35 +360,39 @@ export function SkillsSection() {
                     {activeChartTab === 'bar' && (
                       <div style={{ width: '100%', height: 400 }}>
                         <h3 className="text-lg font-semibold text-foreground mb-2">Skill Proficiency (Bar)</h3>
-                         <MemoizedBarChart width={500} height={300} data={chartData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? "hsl(var(--border))" : "hsl(var(--muted))"} />
-                            <XAxis dataKey="name" angle={-30} textAnchor="end" height={70} interval={0} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }} />
-                            <YAxis tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
-                            <RechartsTooltip 
-                                contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)'}} 
-                                labelStyle={{ color: 'hsl(var(--popover-foreground))', fontWeight: 'bold' }}
-                                itemStyle={{ color: 'hsl(var(--popover-foreground))' }}
-                            />
-                            <Legend wrapperStyle={{ color: 'hsl(var(--muted-foreground))' }}/>
-                            <Bar dataKey="Proficiency" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                        </MemoizedBarChart>
+                         <MemoizedResponsiveContainer width="100%" height="100%">
+                           <BarChart data={chartData}>
+                              <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? "hsl(var(--border))" : "hsl(var(--muted))"} />
+                              <XAxis dataKey="name" angle={-30} textAnchor="end" height={70} interval={0} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }} />
+                              <YAxis tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
+                              <RechartsTooltip 
+                                  contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)'}} 
+                                  labelStyle={{ color: 'hsl(var(--popover-foreground))', fontWeight: 'bold' }}
+                                  itemStyle={{ color: 'hsl(var(--popover-foreground))' }}
+                              />
+                              <Legend wrapperStyle={{ color: 'hsl(var(--muted-foreground))' }}/>
+                              <Bar dataKey="Proficiency" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                           </BarChart>
+                        </MemoizedResponsiveContainer>
                       </div>
                     )}
                     {activeChartTab === 'radar' && (
                       <div style={{ width: '100%', height: 400 }}>
                         <h3 className="text-lg font-semibold text-foreground mb-2">Category Proficiency (Radar)</h3>
-                        <MemoizedRadarChart cx="50%" cy="50%" outerRadius="80%" data={radarChartData}>
-                          <PolarGrid stroke={theme === 'dark' ? "hsl(var(--border))" : "hsl(var(--muted))"}/>
-                          <PolarAngleAxis dataKey="subject" tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
-                          <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}/>
-                           <Radar name="Average Proficiency" dataKey="A" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.6} />
-                           <RechartsTooltip 
-                                contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)'}} 
-                                labelStyle={{ color: 'hsl(var(--popover-foreground))', fontWeight: 'bold' }}
-                                itemStyle={{ color: 'hsl(var(--popover-foreground))' }}
-                            />
-                           <Legend wrapperStyle={{ color: 'hsl(var(--muted-foreground))' }}/>
-                        </MemoizedRadarChart>
+                        <MemoizedResponsiveContainer width="100%" height="100%">
+                          <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarChartData}>
+                            <PolarGrid stroke={theme === 'dark' ? "hsl(var(--border))" : "hsl(var(--muted))"}/>
+                            <PolarAngleAxis dataKey="subject" tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
+                            <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}/>
+                            <Radar name="Average Proficiency" dataKey="A" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.6} />
+                            <RechartsTooltip 
+                                  contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)'}} 
+                                  labelStyle={{ color: 'hsl(var(--popover-foreground))', fontWeight: 'bold' }}
+                                  itemStyle={{ color: 'hsl(var(--popover-foreground))' }}
+                              />
+                            <Legend wrapperStyle={{ color: 'hsl(var(--muted-foreground))' }}/>
+                          </RadarChart>
+                        </MemoizedResponsiveContainer>
                       </div>
                     )}
                   </div>
@@ -402,3 +405,4 @@ export function SkillsSection() {
     </Section>
   );
 }
+
