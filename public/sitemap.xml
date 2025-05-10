@@ -19,15 +19,15 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://yourdomain.com/#contributions</loc> <!-- Replace with your actual domain -->
+    <lastmod>YYYY-MM-DD</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://yourdomain.com/#contact</loc> <!-- Replace with your actual domain -->
     <lastmod>YYYY-MM-DD</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-  </url>
-    <url>
-    <loc>https://yourdomain.com/#ai-suggestions</loc> <!-- Replace with your actual domain -->
-    <lastmod>YYYY-MM-DD</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
   </url>
 </urlset>

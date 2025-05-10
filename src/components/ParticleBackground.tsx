@@ -13,18 +13,41 @@ interface Particle {
   vy: number; // velocity y
 }
 
-const NUM_PARTICLES = 25;
-const PARTICLE_COLOR_HSL = "hsl(var(--primary))"; // Using primary color from theme
+const NUM_PARTICLES = 50; // Increased for better visibility
+const PARTICLE_COLOR_HSL = "hsl(var(--primary))"; 
 
 export function ParticleBackground() {
   const [particles, setParticles] = useState<Particle[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrameId = useRef<number | null>(null);
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    const currentContainer = containerRef.current;
+    if (currentContainer) {
+      const observer = new ResizeObserver(entries => {
+        for (let entry of entries) {
+          setContainerSize({ width: entry.contentRect.width, height: entry.contentRect.height });
+        }
+      });
+      observer.observe(currentContainer);
+      // Set initial size explicitly after observer is set up
+      setContainerSize({ width: currentContainer.offsetWidth, height: currentContainer.offsetHeight });
+      return () => {
+        observer.disconnect();
+        if (animationFrameId.current) {
+          cancelAnimationFrame(animationFrameId.current);
+        }
+      };
+    }
+  }, []);
 
   const initializeParticles = useCallback(() => {
-    if (!containerRef.current) return;
-    const { offsetWidth: width, offsetHeight: height } = containerRef.current;
-    if (width === 0 || height === 0) return; // Avoid division by zero or no-op if container not sized
+    const { width, height } = containerSize;
+    if (width === 0 || height === 0) {
+        setParticles([]); // Clear particles if container has no size
+        return;
+    }
 
     const newParticles: Particle[] = [];
     for (let i = 0; i < NUM_PARTICLES; i++) {
@@ -32,38 +55,30 @@ export function ParticleBackground() {
         id: i,
         x: Math.random() * width,
         y: Math.random() * height,
-        size: Math.random() * 2 + 1, // Size 1px to 3px
-        opacity: Math.random() * 0.3 + 0.05, // Opacity 0.05 to 0.35, making them more subtle
-        vx: (Math.random() - 0.5) * 0.2, // Very slow velocity
+        size: Math.random() * 2 + 1, 
+        opacity: Math.random() * 0.4 + 0.1, // Slightly increased opacity for better visibility
+        vx: (Math.random() - 0.5) * 0.2, 
         vy: (Math.random() - 0.5) * 0.2,
       });
     }
     setParticles(newParticles);
-  }, []);
+  }, [containerSize]);
 
   useEffect(() => {
-    // Initial setup
-    const timer = setTimeout(() => { // Delay initialization slightly to ensure containerRef is sized
-        initializeParticles();
-    }, 100);
-    
-    window.addEventListener('resize', initializeParticles);
-
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('resize', initializeParticles);
-      if (animationFrameId.current) {
-        cancelAnimationFrame(animationFrameId.current);
-      }
-    };
+    // Initialize particles when containerSize is first determined or changes
+    initializeParticles();
   }, [initializeParticles]);
 
   useEffect(() => {
-    if (!containerRef.current || particles.length === 0) return;
+    if (particles.length === 0 || containerSize.width === 0 || containerSize.height === 0) {
+        if (animationFrameId.current) {
+            cancelAnimationFrame(animationFrameId.current);
+            animationFrameId.current = null;
+        }
+      return;
+    }
 
-    const { offsetWidth: width, offsetHeight: height } = containerRef.current;
-    if (width === 0 || height === 0) return;
-
+    const { width, height } = containerSize;
 
     const animateParticles = () => {
       setParticles(prevParticles =>
@@ -71,7 +86,6 @@ export function ParticleBackground() {
           let newX = p.x + p.vx;
           let newY = p.y + p.vy;
 
-          // Boundary conditions (wrap around)
           if (newX + p.size < 0) newX = width + p.size;
           else if (newX - p.size > width) newX = -p.size;
           
@@ -84,14 +98,18 @@ export function ParticleBackground() {
       animationFrameId.current = requestAnimationFrame(animateParticles);
     };
 
-    animationFrameId.current = requestAnimationFrame(animateParticles);
-
+    // Start animation only if not already running
+    if (!animationFrameId.current) {
+        animationFrameId.current = requestAnimationFrame(animateParticles);
+    }
+    
     return () => {
       if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
+        animationFrameId.current = null; 
       }
     };
-  }, [particles]); // Rerun if particles array re-initializes or container dimensions might change
+  }, [particles, containerSize]);
 
   return (
     <div
@@ -102,7 +120,7 @@ export function ParticleBackground() {
       {particles.map(particle => (
         <div
           key={particle.id}
-          className="rounded-full" // Using Tailwind for rounded-full
+          className="rounded-full"
           style={{
             position: 'absolute',
             left: `${particle.x}px`,
@@ -111,7 +129,7 @@ export function ParticleBackground() {
             height: `${particle.size}px`,
             backgroundColor: PARTICLE_COLOR_HSL,
             opacity: particle.opacity,
-            transform: `translate(-50%, -50%)` // Center the particle on its x,y
+            transform: `translate(-50%, -50%)` 
           }}
         />
       ))}

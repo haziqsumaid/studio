@@ -10,8 +10,8 @@ import { cn } from '@/lib/utils';
 const navItems = [
   { href: '#about', label: 'About' },
   { href: '#projects', label: 'Projects' },
+  { href: '#contributions', label: 'Contributions' },
   { href: '#contact', label: 'Contact' },
-  { href: '#ai-suggestions', label: 'AI Tools' },
 ];
 
 export function Navbar() {
