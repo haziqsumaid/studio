@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { cn } from '@/lib/utils';
 
 interface Particle {
   id: number;
@@ -13,8 +14,8 @@ interface Particle {
   vy: number; // velocity y
 }
 
-const NUM_PARTICLES = 80; 
-const PARTICLE_COLOR_HSL = "hsl(var(--primary))"; 
+const NUM_PARTICLES = 80;
+const PARTICLE_COLOR_HSL = "hsl(var(--primary))";
 
 export function ParticleBackground() {
   const [particles, setParticles] = useState<Particle[]>([]);
@@ -31,21 +32,25 @@ export function ParticleBackground() {
         }
       });
       observer.observe(currentContainer);
+      // Set initial size
       setContainerSize({ width: currentContainer.offsetWidth, height: currentContainer.offsetHeight });
+      
       return () => {
         observer.disconnect();
         if (animationFrameId.current) {
           cancelAnimationFrame(animationFrameId.current);
+          animationFrameId.current = null;
         }
       };
     }
   }, []);
 
-  const initializeParticles = useCallback(() => {
+  // Initialize or re-initialize particles when container size changes
+  useEffect(() => {
     const { width, height } = containerSize;
     if (width === 0 || height === 0) {
-        setParticles([]); 
-        return;
+      setParticles([]);
+      return;
     }
 
     const newParticles: Particle[] = [];
@@ -54,70 +59,55 @@ export function ParticleBackground() {
         id: i,
         x: Math.random() * width,
         y: Math.random() * height,
-        size: Math.random() * 2 + 2, 
-        opacity: Math.random() * 0.5 + 0.3, 
-        vx: (Math.random() - 0.5) * 0.6, 
-        vy: (Math.random() - 0.5) * 0.6, 
+        size: Math.random() * 2 + 2,
+        opacity: Math.random() * 0.5 + 0.3,
+        vx: (Math.random() - 0.5) * 0.6,
+        vy: (Math.random() - 0.5) * 0.6,
       });
     }
     setParticles(newParticles);
-  }, [containerSize]);
+  }, [containerSize.width, containerSize.height]);
 
-  useEffect(() => {
-    initializeParticles();
-  }, [initializeParticles]);
-
+  // Animation loop
   useEffect(() => {
     if (particles.length === 0 || containerSize.width === 0 || containerSize.height === 0) {
-        if (animationFrameId.current) {
-            cancelAnimationFrame(animationFrameId.current);
-            animationFrameId.current = null;
-        }
+      if (animationFrameId.current) {
+        cancelAnimationFrame(animationFrameId.current);
+        animationFrameId.current = null;
+      }
       return;
     }
 
     const { width, height } = containerSize;
 
-    const animateParticles = () => {
+    const animate = () => {
       setParticles(prevParticles =>
         prevParticles.map(p => {
           let newX = p.x + p.vx;
           let newY = p.y + p.vy;
 
-          // Corrected wrapping logic for centered particles
-          // If particle's right edge (p.x + p.size/2) goes beyond container width
-          if (newX - p.size / 2 > width) {
-            newX = -p.size / 2; // Reappear on the left, with its right edge at 0
-          } 
-          // Else if particle's left edge (p.x - p.size/2) goes before container origin
-          else if (newX + p.size / 2 < 0) {
-            newX = width + p.size / 2; // Reappear on the right, with its left edge at width
-          }
+          // Wrapping logic
+          if (newX - p.size / 2 > width) newX = -p.size / 2;
+          else if (newX + p.size / 2 < 0) newX = width + p.size / 2;
 
-          // Similar for Y
-          if (newY - p.size / 2 > height) {
-            newY = -p.size / 2;
-          } else if (newY + p.size / 2 < 0) {
-            newY = height + p.size / 2;
-          }
-
+          if (newY - p.size / 2 > height) newY = -p.size / 2;
+          else if (newY + p.size / 2 < 0) newY = height + p.size / 2;
+          
           return { ...p, x: newX, y: newY };
         })
       );
-      animationFrameId.current = requestAnimationFrame(animateParticles);
+      animationFrameId.current = requestAnimationFrame(animate);
     };
 
-    if (!animationFrameId.current) {
-        animationFrameId.current = requestAnimationFrame(animateParticles);
-    }
-    
+    animationFrameId.current = requestAnimationFrame(animate);
+
     return () => {
       if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
-        animationFrameId.current = null; 
+        animationFrameId.current = null;
       }
     };
-  }, [particles, containerSize]); 
+  }, [particles.length, containerSize.width, containerSize.height]); // Re-run if particles are re-initialized or container size changes
 
   return (
     <div
@@ -128,7 +118,7 @@ export function ParticleBackground() {
       {particles.map(particle => (
         <div
           key={particle.id}
-          className="rounded-full" // Removed border-0 as it was based on a likely incorrect hypothesis
+          className="rounded-full"
           style={{
             position: 'absolute',
             left: `${particle.x}px`,
@@ -137,7 +127,7 @@ export function ParticleBackground() {
             height: `${particle.size}px`,
             backgroundColor: PARTICLE_COLOR_HSL,
             opacity: particle.opacity,
-            transform: `translate(-50%, -50%)` 
+            transform: `translate(-50%, -50%)`
           }}
         />
       ))}
