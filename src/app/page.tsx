@@ -2,7 +2,7 @@ import { HeroSection } from '@/components/sections/HeroSection';
 import { AboutSection } from '@/components/sections/AboutSection';
 import { ProjectsSection } from '@/components/sections/ProjectsSection';
 import { ContactSection } from '@/components/sections/ContactSection';
-import { GithubContributionsSection } from '@/components/sections/GithubContributionsSection';
+// import { GithubContributionsSection } from '@/components/sections/GithubContributionsSection'; // Temporarily removed
 
 export default function Home() {
   return (
@@ -10,7 +10,7 @@ export default function Home() {
       <HeroSection />
       <AboutSection />
       <ProjectsSection />
-      <GithubContributionsSection />
+      {/* <GithubContributionsSection /> */} {/* Temporarily removed */}
       <ContactSection />
     </>
   );

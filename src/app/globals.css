@@ -128,7 +128,7 @@ body {
     color: transparent; 
   }
   50% { 
-    color: inherit; 
+    color: hsl(var(--primary)); /* Use primary color for cursor */
   }
 }
 

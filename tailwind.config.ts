@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import defaultTheme from 'tailwindcss/defaultTheme';
 
 export default {
     darkMode: ["class"],
@@ -8,6 +9,10 @@ export default {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+    screens: {
+      'xs': '475px', // Extra small screen breakpoint
+      ...defaultTheme.screens,
+    },
   	extend: {
   		colors: {
   			background: 'hsl(var(--background))',

@@ -1,8 +1,8 @@
 "use client";
 
+import React, { useEffect, useRef, useState } from 'react'; // Added React import
 import Image from 'next/image';
 import { motion, useMotionValue, useReducedMotion, useSpring, useTransform, useAnimation } from 'framer-motion';
-import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface DynamicPhotoProps {
@@ -96,10 +96,10 @@ export function DynamicPhoto({ src, alt, className }: DynamicPhotoProps) {
   };
 
   const photoMaskVariants = {
-    initial: { clipPath: reducedMotion ? "inset(0% 0% 0% 0%)" : "inset(0% 100% 0% 0%)" },
+    initial: { clipPath: reducedMotion ? "inset(0% 0% 0% 0%)" : "inset(0% 0% 0% 100%)" }, // Wipe from LEFT to RIGHT
     animate: { 
       clipPath: "inset(0% 0% 0% 0%)",
-      transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1], delay: reducedMotion ? 0 : 0.5 }
+      transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1], delay: reducedMotion ? 0 : 0.6 }
     },
   };
 
@@ -116,19 +116,20 @@ export function DynamicPhoto({ src, alt, className }: DynamicPhotoProps) {
         viewBox="0 0 100 100"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
       >
         <motion.circle
           cx="50"
           cy="50"
           r="48"
-          stroke="url(#gradient-border)"
+          stroke="url(#gradient-border-dynamic-photo)" 
           strokeWidth="3"
           variants={ringVariants}
           initial="initial"
           animate={ringControls}
         />
         <defs>
-          <linearGradient id="gradient-border" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id="gradient-border-dynamic-photo" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="hsl(var(--gradient-start))" />
             <stop offset="50%" stopColor="hsl(var(--gradient-middle))" />
             <stop offset="100%" stopColor="hsl(var(--gradient-end))" />
@@ -158,6 +159,7 @@ export function DynamicPhoto({ src, alt, className }: DynamicPhotoProps) {
                     background: `radial-gradient(circle at ${glintX} ${glintY}, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 30%)`,
                     mixBlendMode: 'overlay',
                 }}
+                aria-hidden="true"
             />
         )}
       </motion.div>
