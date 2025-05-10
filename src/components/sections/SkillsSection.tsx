@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
@@ -16,15 +17,19 @@ import {
   PolarAngleAxis,
   PolarRadiusAxis,
   Radar,
-  Tooltip as RechartsTooltip,
   Legend,
+  Tooltip as RechartsTooltip,
+  BarChart as RechartsBarChart, // Renamed to avoid conflict
+  XAxis,
+  YAxis,
+  Bar,
+  CartesianGrid,
 } from 'recharts';
 import { useTheme } from '@/contexts/ThemeContext';
 
-
 const ICON_SIZE = 28;
-const RING_RADIUS = 22; // Slightly increased for better icon visibility
-const RING_STROKE_WIDTH = 3;
+const RING_RADIUS = 22;
+const RING_STROKE_WIDTH = 2.5;
 
 interface SkillBadgeProps {
   skill: Skill;
@@ -44,38 +49,39 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, radi
     offset: ["start end", "end start"]
   });
 
-  // Animate proficiency ring based on visibility and scroll, or fully if reduced motion
-  const proficiencyPathLength = isReducedMotion 
-    ? skill.proficiency / 100 
-    : useTransform(scrollYProgress, [0.2, 0.6], [0, skill.proficiency / 100]);
+  // Proficiency ring animation
+  const pathLengthScrollRange = isReducedMotion ? [0,0] as [number,number] : [0.2, 0.8];
+  const animatedPathLength = useTransform(scrollYProgress, pathLengthScrollRange, [0, skill.proficiency / 100]);
 
-
+  // Calculate positions
   const angle = (index / totalSkills) * 2 * Math.PI - Math.PI / 2; // Start from top
+
   const finalX = radius * Math.cos(angle) + centerOffset.x;
   const finalY = radius * Math.sin(angle) + centerOffset.y;
 
-  const initialX = finalX * 1.8; // Start further out
-  const initialY = finalY * 1.8; // Start further out
+  const initialOrbitRadiusFactor = 1.8; // How much further out they start for the animation
+  const actualInitialX = isReducedMotion ? finalX : (radius * initialOrbitRadiusFactor) * Math.cos(angle) + centerOffset.x;
+  const actualInitialY = isReducedMotion ? finalY : (radius * initialOrbitRadiusFactor) * Math.sin(angle) + centerOffset.y;
 
   const itemVariants = {
-    hidden: { 
-      opacity: 0, 
-      scale: 0.3, 
-      x: isReducedMotion ? finalX : initialX, 
-      y: isReducedMotion ? finalY : initialY,
+    hidden: {
+      opacity: 0,
+      scale: 0.3,
+      x: actualInitialX, // Use defined values
+      y: actualInitialY, // Use defined values
       rotate: isReducedMotion ? 0 : (Math.random() - 0.5) * 45 // Slight random initial rotation
     },
     visible: {
       opacity: 1,
       scale: 1,
       rotate: 0,
-      x: finalX,
-      y: finalY,
-      transition: { 
-        type: 'spring', 
-        stiffness: isReducedMotion ? 300 : 80, // Softer spring for entry
-        damping: isReducedMotion ? 30 : 15, 
-        delay: isReducedMotion ? 0 : index * 0.07 // Slightly more delay
+      x: finalX, // Animate to finalX
+      y: finalY, // Animate to finalY
+      transition: {
+        type: 'spring',
+        stiffness: isReducedMotion ? 300 : 80,
+        damping: isReducedMotion ? 30 : 15,
+        delay: isReducedMotion ? 0 : index * 0.08 + 0.3
       }
     }
   };
@@ -84,12 +90,12 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, radi
     const currentRef = ref.current;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) { // Removed boundingClientRect.top > 0, as it could prevent animation for elements already in view at top
+        if (entry.isIntersecting) {
           controls.start("visible");
           observer.unobserve(entry.target);
         }
       },
-      { threshold: 0.1 } // Trigger when 10% of the element is visible
+      { threshold: 0.1 }
     );
 
     if (currentRef) observer.observe(currentRef);
@@ -105,48 +111,47 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, radi
         <TooltipTrigger asChild>
           <motion.div
             ref={ref}
-            className="absolute group left-0 top-0" // Positioned by x, y from variants
+            className="absolute group left-0 top-0"
             variants={itemVariants}
             initial="hidden"
             animate={controls}
             whileHover={!isReducedMotion ? {
-              scale: 1.25, // Slightly more pop
-              zIndex: 20, // Ensure it's above others
-              rotate: (Math.random() - 0.5) * 10, // Subtle random tilt
-              boxShadow: '0 0 20px hsla(var(--gradient-middle), 0.5)', // Enhanced glow
-              transition: { type: 'spring', stiffness: 350, damping: 15 }, // Responsive hover
+              scale: 1.25,
+              zIndex: 50,
+              rotate: (Math.random() - 0.5) * 10,
+              boxShadow: '0 0 20px hsla(var(--gradient-middle), 0.5)',
+              transition: { type: 'spring', stiffness: 350, damping: 15, duration: 0.3 },
             } : {}}
-            // No explicit transition for hover end, Framer Motion handles revert to `animate` state's transition
-            style={{ width: (RING_RADIUS + RING_STROKE_WIDTH) * 2 + 20, height: (RING_RADIUS + RING_STROKE_WIDTH) * 2 + 40 }} // Ensure enough space for text
+            style={{ width: (RING_RADIUS + RING_STROKE_WIDTH) * 2 + 20, height: (RING_RADIUS + RING_STROKE_WIDTH) * 2 + 40 }}
             >
             <div className="relative flex flex-col items-center">
               <svg
                 width={(RING_RADIUS + RING_STROKE_WIDTH) * 2}
                 height={(RING_RADIUS + RING_STROKE_WIDTH) * 2}
                 viewBox={`0 0 ${(RING_RADIUS + RING_STROKE_WIDTH) * 2} ${(RING_RADIUS + RING_STROKE_WIDTH) * 2}`}
-                className="mb-1.5 rotate-[-90deg]" // rotate to start from top
+                className="mb-1.5 rotate-[-90deg]"
               >
-                <circle // Background ring
+                <circle
                   cx={RING_RADIUS + RING_STROKE_WIDTH}
                   cy={RING_RADIUS + RING_STROKE_WIDTH}
                   r={RING_RADIUS}
                   fill="transparent"
-                  stroke="hsl(var(--muted))" 
-                  strokeOpacity={0.3} // Softer background
+                  stroke="hsl(var(--muted))"
+                  strokeOpacity={0.3}
                   strokeWidth={RING_STROKE_WIDTH}
                 />
-                <motion.circle // Proficiency ring
+                <motion.circle
                   cx={RING_RADIUS + RING_STROKE_WIDTH}
                   cy={RING_RADIUS + RING_STROKE_WIDTH}
                   r={RING_RADIUS}
                   fill="transparent"
-                  stroke="url(#skillRingGradient)" // Use gradient for stroke
+                  stroke="url(#skillRingGradient)"
                   strokeWidth={RING_STROKE_WIDTH}
-                  strokeLinecap="round" // Nicer ends
+                  strokeLinecap="round"
                   strokeDasharray={2 * Math.PI * RING_RADIUS}
-                  strokeDashoffset={0} // Ensures animation starts from 0 offset
-                  style={{ pathLength: proficiencyPathLength }}
-                  transition={isReducedMotion ? {duration: 0} : { duration: 0.8, ease: "circOut", delay: 0.3 }} // Slightly delayed and longer animation
+                  strokeDashoffset={0}
+                  style={{ pathLength: animatedPathLength }}
+                  transition={{ duration: 0 }}
                 />
                 <defs>
                     <linearGradient id="skillRingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -156,7 +161,7 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, radi
                     </linearGradient>
                 </defs>
               </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
                  <skill.icon size={ICON_SIZE*0.9} className="text-foreground group-hover:text-[hsl(var(--gradient-middle))] transition-colors duration-200" />
               </div>
             </div>
@@ -165,7 +170,7 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, radi
             </p>
           </motion.div>
         </TooltipTrigger>
-        <TooltipContent side="top" className="bg-popover text-popover-foreground p-2 rounded-lg shadow-xl border border-border text-xs">
+        <TooltipContent side="top" className="bg-popover text-popover-foreground p-2 rounded-md shadow-lg border border-border text-xs pointer-events-none">
           <p className="font-bold gradient-text">{skill.name}</p>
           <p>Proficiency: <span className="font-semibold">{skill.proficiency}%</span></p>
           <p>Experience: <span className="font-semibold">{skill.experience}</span></p>
@@ -176,28 +181,28 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, radi
 };
 
 const MemoizedRadarChart = React.memo(RadarChart);
+const MemoizedBarChart = React.memo(RechartsBarChart);
 
 
 export function SkillsSection() {
   const [isMobile, setIsMobile] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const framerReducedMotion = useReducedMotion();
-  const [isReducedMotionActive, setIsReducedMotionActive] = useState(true);
+  const [isReducedMotionActive, setIsReducedMotionActive] = useState(true); // Default true for server
 
   const { theme } = useTheme();
-  const [chartKey, setChartKey] = useState(0); // To force re-render of chart on theme change
+  const [chartKey, setChartKey] = useState(0);
 
   useEffect(() => {
     setIsClient(true);
-    setIsReducedMotionActive(framerReducedMotion ?? false);
-    const checkMobile = () => setIsMobile(window.innerWidth < 768); // md breakpoint
+    setIsReducedMotionActive(framerReducedMotion ?? false); // Set based on hook once client-side
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, [framerReducedMotion]);
 
   useEffect(() => {
-    // Update chart key when theme changes to ensure Recharts updates styles
     setChartKey(prevKey => prevKey + 1);
   }, [theme]);
 
@@ -213,22 +218,28 @@ export function SkillsSection() {
     };
   }), []);
 
+  const barChartData = useMemo(() => {
+    return skillsData
+      .sort((a, b) => b.proficiency - a.proficiency)
+      .slice(0, 5) // Top 5 skills
+      .map(skill => ({ name: skill.name, proficiency: skill.proficiency }));
+  }, []);
+
 
   const sectionVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: isReducedMotionActive ? 0 : 0.15, delayChildren: 0.2 } // Increased stagger and delay
+      transition: { staggerChildren: isReducedMotionActive ? 0 : 0.15, delayChildren: 0.2 }
     },
   };
 
   const headingVariants = {
-    hidden: { opacity: 0, y: -30 }, // Start from top
+    hidden: { opacity: 0, y: -30 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'circOut' } },
   };
 
-
-  const [galaxyRadius, setGalaxyRadius] = useState(250); // Default radius
+  const [galaxyRadius, setGalaxyRadius] = useState(250);
   const [centerOffset, setCenterOffset] = useState({ x: 0, y: 0 });
   const galaxyContainerRef = useRef<HTMLDivElement>(null);
   const radarChartContainerRef = useRef<HTMLDivElement>(null);
@@ -240,14 +251,10 @@ export function SkillsSection() {
       if (galaxyContainerRef.current && radarChartContainerRef.current) {
         const containerWidth = galaxyContainerRef.current.offsetWidth;
         const containerHeight = galaxyContainerRef.current.offsetHeight;
-        const radarChartWidth = radarChartContainerRef.current.offsetWidth;
         
-        // Calculate radius for badges to orbit around the radar chart
-        // Ensure badges are outside the radar chart, plus some padding
-        const newRadius = Math.min(containerWidth, containerHeight) / 2.2 - Math.max(ICON_SIZE, RING_RADIUS*2)/2; // Outer edge for badges
-        setGalaxyRadius(Math.max(180, newRadius, radarChartWidth / 2 + 80)); // Minimum radius, ensure space
+        const newRadius = Math.min(containerWidth, containerHeight) / 2 - Math.max(ICON_SIZE, RING_RADIUS * 2) / 2 - 20; // 20 for padding
+        setGalaxyRadius(Math.max(180, newRadius));
 
-        // Center offset should be half of the container's dimensions
         setCenterOffset({ x: containerWidth / 2, y: containerHeight / 2 });
       }
     };
@@ -255,17 +262,16 @@ export function SkillsSection() {
     updateLayout();
     window.addEventListener('resize', updateLayout);
     
-    // Observe the radar chart container for size changes (if it's dynamic)
     const resizeObserver = new ResizeObserver(updateLayout);
-    resizeObserver.observe(radarChartContainerRef.current);
+    if (galaxyContainerRef.current) resizeObserver.observe(galaxyContainerRef.current);
+    if (radarChartContainerRef.current) resizeObserver.observe(radarChartContainerRef.current);
 
     return () => {
       window.removeEventListener('resize', updateLayout);
-      if (radarChartContainerRef.current) {
-        resizeObserver.unobserve(radarChartContainerRef.current);
-      }
+      if (galaxyContainerRef.current) resizeObserver.unobserve(galaxyContainerRef.current);
+      if (radarChartContainerRef.current) resizeObserver.unobserve(radarChartContainerRef.current);
     };
-  }, [isClient, radarChartContainerRef, galaxyContainerRef]);
+  }, [isClient]);
 
 
   if (!isClient) {
@@ -323,7 +329,7 @@ export function SkillsSection() {
     );
   }
 
-  // Desktop View: Radial Galaxy
+  // Desktop View: Radial Galaxy with central Radar Chart
   return (
     <Section id="skills" className="py-24 md:py-32 lg:py-40 overflow-hidden">
        <motion.h2
@@ -332,29 +338,31 @@ export function SkillsSection() {
         initial={isReducedMotionActive ? "visible" : "hidden"}
         whileInView="visible"
         viewport={{ once: true, amount: 0.5 }}
-        className="text-4xl md:text-5xl font-bold mb-20 md:mb-28 text-center gradient-text" // Increased margin bottom
+        className="text-4xl md:text-5xl font-bold mb-20 md:mb-28 text-center gradient-text"
       >
         My Tech Toolbox
       </motion.h2>
 
       <motion.div
         ref={galaxyContainerRef}
-        className="relative w-full aspect-square max-w-3xl mx-auto" // Use aspect-square for consistent circle, max-width for control
+        className="relative w-full max-w-4xl mx-auto" // Increased max-width for more space
+        style={{ height: 'calc(min(80vw, 700px))' }} // Ensure height for galaxy
         variants={sectionVariants}
         initial={isReducedMotionActive ? "visible" : "hidden"}
         whileInView="visible"
-        viewport={{ once: true, amount: 0.1 }} // Trigger earlier for full section animation
+        viewport={{ once: true, amount: 0.1 }}
       >
-        {/* Central Radar Chart - positioned in the center of galaxyContainerRef */}
+        {/* Central Radar Chart - positioned absolutely in the center of galaxyContainerRef */}
         <motion.div
             ref={radarChartContainerRef}
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 
-                       w-[55%] h-[55%] sm:w-[50%] sm:h-[50%] md:w-[45%] md:h-[45%] lg:w-[40%] lg:h-[40%]" // Percentage based width/height
+                       w-[60%] h-[60%] sm:w-[55%] sm:h-[55%] md:w-[50%] md:h-[50%] lg:w-[45%] lg:h-[45%]"
+            style={{ maxWidth: '450px', maxHeight: '450px' }} // Cap radar chart size
             initial={{ opacity: 0, scale: 0.3 }}
-            animate={{ opacity: 1, scale: 1, transition: { delay: isReducedMotionActive ? 0 : skillsData.length * 0.07 + 0.5, duration: 0.8, ease: "circOut" } }} // Delay after badges animate in
+            animate={{ opacity: 1, scale: 1, transition: { delay: isReducedMotionActive ? 0 : skillsData.length * 0.07 + 0.5, duration: 0.8, ease: "circOut" } }}
         >
           <ResponsiveContainer key={chartKey} width="100%" height="100%">
-            <MemoizedRadarChart cx="50%" cy="50%" outerRadius="70%" data={radarChartData} margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
+            <MemoizedRadarChart cx="50%" cy="50%" outerRadius="75%" data={radarChartData} margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
               <defs>
                 <radialGradient id="radarGradientCore" cx="50%" cy="50%" r="60%">
                   <stop offset="0%" stopColor={theme === 'dark' ? "hsla(var(--gradient-start), 0.5)" : "hsla(var(--gradient-start), 0.7)"} />
@@ -381,11 +389,11 @@ export function SkillsSection() {
               />
               <RechartsTooltip
                 contentStyle={{
-                    backgroundColor: 'hsla(var(--popover-rgb), 0.85)', 
+                    backgroundColor: 'hsla(var(--popover-rgb), 0.85)',
                     backdropFilter: 'blur(5px)',
                     border: '1px solid hsl(var(--border))',
                     borderRadius: 'var(--radius)',
-                    boxShadow: 'var(--shadow-lg)' 
+                    boxShadow: 'var(--shadow-lg)'
                 }}
                 labelStyle={{ color: 'hsl(var(--popover-foreground))', fontWeight: 'bold', marginBottom: '4px', fontSize:'13px' }}
                 itemStyle={{ color: 'hsl(var(--popover-foreground))', fontSize:'12px' }}
@@ -394,14 +402,14 @@ export function SkillsSection() {
               <Legend
                 wrapperStyle={{
                     color: 'hsl(var(--muted-foreground))',
-                    paddingTop: '15px', 
+                    paddingTop: '15px',
                     fontSize: '11px',
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    width: '100%', 
+                    width: '100%',
                 }}
-                align="center" 
+                align="center"
                 iconSize={8}
                 />
             </MemoizedRadarChart>
@@ -415,13 +423,15 @@ export function SkillsSection() {
             skill={skill}
             index={index}
             totalSkills={skillsData.length}
-            radius={galaxyRadius}
+            radius={galaxyRadius} // This radius is for the orbit around the center
             isReducedMotion={isReducedMotionActive}
-            centerOffset={centerOffset} // Pass center offset for correct absolute positioning relative to true center
+            centerOffset={centerOffset}
           />
         ))}
       </motion.div>
+
     </Section>
   );
 }
 
+      
