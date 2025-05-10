@@ -86,6 +86,7 @@ export function ParticleBackground() {
           let newX = p.x + p.vx;
           let newY = p.y + p.vy;
 
+          // Wrap particles around the screen edges
           if (newX + p.size < 0) newX = width + p.size;
           else if (newX - p.size > width) newX = -p.size;
           
@@ -109,7 +110,7 @@ export function ParticleBackground() {
         animationFrameId.current = null; 
       }
     };
-  }, [particles, containerSize]);
+  }, [particles, containerSize]); // Rerun effect if particles or containerSize change
 
   return (
     <div
@@ -129,7 +130,7 @@ export function ParticleBackground() {
             height: `${particle.size}px`,
             backgroundColor: PARTICLE_COLOR_HSL,
             opacity: particle.opacity,
-            transform: `translate(-50%, -50%)` 
+            transform: `translate(-50%, -50%)` // Center particle on its x,y coordinates
           }}
         />
       ))}
