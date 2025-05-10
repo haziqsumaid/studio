@@ -22,39 +22,45 @@ body {
     --popover-rgb: 255, 255, 255; /* White */
     --popover: 0 0% 100%;
     --popover-foreground: 215 25% 27%;
-    --primary-rgb: 56, 239, 125; /* Green gradient middle #38EF7D */
-    --primary: 145 85% 58%; 
-    --primary-foreground: 160 17% 6%; /* Dark text for primary buttons */
+
+    /* Updated Primary Colors for Light Theme - Black/Dark Gray Accent */
+    --primary-rgb: 33, 37, 41; /* Dark Slate Gray (approx. for hsl(220, 10%, 15%)) */
+    --primary: 220 10% 15%; /* Dark Slate Gray */
+    --primary-foreground: 0 0% 98%; /* Near White (for contrast on dark primary) */
+    
     --secondary: 210 30% 94%; /* Lighter Grayish Blue */
     --secondary-foreground: 215 20% 35%; 
     --muted: 210 30% 90%; /* Light Gray */
     --muted-foreground: 215 15% 50%; /* Medium Gray */
-    --accent-rgb: 159, 236, 194; /* Light Green */
-    --accent: 145 70% 75%;
-    --accent-foreground: 145 50% 30%; /* Darker Green for text on accent */
+
+    /* Updated Accent Colors for Light Theme - Subtle Grayish Blue */
+    --accent-rgb: 199, 201, 209; /* Light Grayish Blue (approx. for hsl(220, 10%, 80%)) */
+    --accent: 220 10% 80%; /* Light Grayish Blue */
+    --accent-foreground: 220 10% 20%; /* Dark Blue-Gray (for text on light accent) */
+    
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
     --border: 210 20% 88%; /* Light Gray Border */
     --input: 210 20% 91%; /* Slightly darker light gray for input background */
-    --ring: 145 85% 58%; /* Primary Green for focus rings */
-    --radius: 0.5rem;
+    --ring: 220 10% 25%; /* Dark Slate Gray (for focus rings, slightly lighter than new primary) */
 
-    --gradient-start: 175 80% 33%; /* #11998E */
-    --gradient-middle: 145 85% 58%; /* #38EF7D */
-    --gradient-end: 85 56% 51%;   /* #96C93D */
+    /* Updated Gradient for Light Theme - Monochromatic Dark Gray */
+    --gradient-start: 220 10% 25%;   /* Dark Gray (lighter) */
+    --gradient-middle: 220 10% 15%;  /* Dark Gray (primary) */
+    --gradient-end: 220 10% 10%;     /* Dark Gray (darker) */
     
-    /* Green levels for GitHub chart - Light Theme */
-    --chart-git-1: 145 70% 90%;   /* very light green */
-    --chart-git-2: 145 65% 75%;   /* light green */
-    --chart-git-3: 145 60% 60%;   /* medium green */
-    --chart-git-4: 145 55% 45%;   /* dark green */
+    /* Updated Green levels for GitHub chart - Light Theme (now shades of gray-blue) */
+    --chart-git-1: 220 10% 90%;   /* very light gray-blue */
+    --chart-git-2: 220 10% 75%;   /* light gray-blue */
+    --chart-git-3: 220 10% 60%;   /* medium gray-blue */
+    --chart-git-4: 220 10% 45%;   /* dark gray-blue */
 
     /* General chart colors - Light Theme */
-    --chart-1: 145 85% 58%; /* Primary Green */
-    --chart-2: 200 80% 60%; /* Sky Blue */
-    --chart-3: 30 90% 65%;  /* Orange */
-    --chart-4: 260 70% 70%; /* Lavender */
-    --chart-5: 340 85% 70%; /* Pink */
+    --chart-1: 220 10% 15%; /* New Primary: Dark Slate Gray */
+    --chart-2: 200 80% 60%; /* Sky Blue (kept for diversity) */
+    --chart-3: 30 90% 65%;  /* Orange (kept for diversity) */
+    --chart-4: 260 70% 70%; /* Lavender (kept for diversity) */
+    --chart-5: 340 85% 70%; /* Pink (kept for diversity) */
   }
 
   .dark {
@@ -81,6 +87,10 @@ body {
     --border: 0 0% 25%; /* Darker gray for borders #404040 */
     --input: 0 0% 20%; /* Slightly lighter for input fields */
     --ring: 145 85% 58%; /* Green gradient middle for focus rings */
+
+    --gradient-start: 175 80% 33%; /* #11998E */
+    --gradient-middle: 145 85% 58%; /* #38EF7D */
+    --gradient-end: 85 56% 51%;   /* #96C93D */
     
     /* Green levels for GitHub chart - Dark Theme */
     --chart-git-1: 142.6 80% 65%;   
