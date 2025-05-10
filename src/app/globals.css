@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -106,3 +107,21 @@ body {
     background-image: linear-gradient(hsl(var(--background)), hsl(var(--background))), linear-gradient(to right, hsl(var(--gradient-end)), hsl(var(--gradient-middle)), hsl(var(--gradient-start)));
 }
 
+.typing-cursor::after {
+  content: '|';
+  animation: blink 1s step-end infinite;
+  margin-left: 0.125em; /* Adjust spacing as needed */
+  @apply text-[hsl(var(--primary))]; /* Cursor color matching primary/gradient */
+}
+
+@keyframes blink {
+  from, to { 
+    /* In dark mode, a transparent cursor against gradient text might not be ideal.
+       Let's try making it match the gradient's approximate color or a visible accent.
+    */
+    color: transparent; /* Effectively invisible */
+  }
+  50% { 
+    color: inherit; /* Inherits from .gradient-text, or use a specific color like hsl(var(--primary)) */
+  }
+}
