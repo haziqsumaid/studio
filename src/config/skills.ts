@@ -296,11 +296,6 @@ export const skillsData: Skill[] = [
   }
 ];
 
-export const centralNode = {
-  id: 'core-skills',
-  name: 'Core Skills',
-  icon: Cpu,
-};
 
 // Define relationships for constellation lines (desktop only)
 // This is a simplified representation; actual line drawing would need coordinates.
