@@ -1,3 +1,4 @@
+
 import Image from 'next/image';
 import { Section } from '@/components/Section';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -71,7 +72,11 @@ export function AboutSection() {
                 <h3 className="text-xl font-semibold text-foreground mb-3">Core Skills:</h3>
                 <div className="flex flex-wrap gap-3">
                   {skills.map((skill) => (
-                    <Badge key={skill.name} variant="secondary" className="text-sm px-3 py-1.5 flex items-center gap-2 bg-secondary/70 border-border hover:bg-secondary transition-colors">
+                    <Badge 
+                      key={skill.name} 
+                      variant="secondary" 
+                      className="text-sm px-3 py-1.5 flex items-center gap-2 bg-secondary/70 border-border hover:bg-secondary transition-all duration-200 ease-in-out transform hover:scale-105"
+                    >
                       {skill.icon}
                       {skill.name}
                     </Badge>
@@ -85,3 +90,4 @@ export function AboutSection() {
     </Section>
   );
 }
+

@@ -7,7 +7,7 @@ import { Download } from 'lucide-react';
 import { GradientText } from '@/components/GradientText';
 import { FadeInOnScroll } from '@/components/FadeInOnScroll';
 import Link from 'next/link';
-import { ParticleBackground } from '@/components/ParticleBackground'; // Added
+// Removed: import { ParticleBackground } from '@/components/ParticleBackground'; 
 import { cn } from '@/lib/utils';
 
 const roles = [
@@ -52,8 +52,8 @@ export function HeroSection() {
   }, [displayedText, isDeleting, currentRoleIndex]);
 
   return (
-    <section id="hero" className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
-      <ParticleBackground />
+    <section id="hero" className="min-h-screen flex items-center justify-center bg-background relative">
+      {/* Removed: <ParticleBackground /> */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
         <FadeInOnScroll>
           <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold mb-6">
@@ -64,14 +64,13 @@ export function HeroSection() {
           <p 
             className={cn(
               "text-xl sm:text-2xl md:text-3xl mb-10 max-w-3xl mx-auto",
-              "h-16 sm:h-20 md:h-24", // Adjusted height for typical 1-2 lines of text-3xl
-              "flex items-center justify-center" // Ensure vertical centering if text is short
+              "h-16 sm:h-20 md:h-24", 
+              "flex items-center justify-center" 
             )}
             aria-live="polite"
             aria-atomic="true"
           >
             <GradientText className="typing-cursor">{displayedText}</GradientText>
-            {/* Ensures a consistent height even if displayedText is empty by having a non-breaking space with visibility hidden */}
             <span className="invisible" aria-hidden="true">&nbsp;</span>
           </p>
         </FadeInOnScroll>
@@ -87,3 +86,4 @@ export function HeroSection() {
     </section>
   );
 }
+
