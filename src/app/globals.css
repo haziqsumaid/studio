@@ -14,40 +14,47 @@ body {
 
 @layer base {
   :root {
-    --background-rgb: 255, 255, 255; /* For hsla(var(--background-rgb), opacity) */
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover-rgb: 255, 255, 255; /* Added for hsla usage */
+    --background-rgb: 247, 250, 252; /* Light Grayish Blue */
+    --background: 210 40% 98%;
+    --foreground: 215 25% 27%; /* Dark Desaturated Blue/Gray */
+    --card: 0 0% 100%; /* White */
+    --card-foreground: 215 25% 27%;
+    --popover-rgb: 255, 255, 255; /* White */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary-rgb: 56, 239, 125; /* Added for #38EF7D in RGB */
-    --primary: 145 85% 58%; /* Green gradient middle #38EF7D */
+    --popover-foreground: 215 25% 27%;
+    --primary-rgb: 56, 239, 125; /* Green gradient middle #38EF7D */
+    --primary: 145 85% 58%; 
     --primary-foreground: 160 17% 6%; /* Dark text for primary buttons */
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent-rgb: 189, 189, 189; /* For hsla(var(--accent-rgb), opacity) */
-    --accent: 0 0% 74%; /* Gray #BDBDBD */
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 145 85% 58%; /* Green gradient middle for focus rings */
+    --secondary: 210 30% 94%; /* Lighter Grayish Blue */
+    --secondary-foreground: 215 20% 35%; 
+    --muted: 210 30% 90%; /* Light Gray */
+    --muted-foreground: 215 15% 50%; /* Medium Gray */
+    --accent-rgb: 159, 236, 194; /* Light Green */
+    --accent: 145 70% 75%;
+    --accent-foreground: 145 50% 30%; /* Darker Green for text on accent */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 210 20% 88%; /* Light Gray Border */
+    --input: 210 20% 91%; /* Slightly darker light gray for input background */
+    --ring: 145 85% 58%; /* Primary Green for focus rings */
     --radius: 0.5rem;
 
     --gradient-start: 175 80% 33%; /* #11998E */
     --gradient-middle: 145 85% 58%; /* #38EF7D */
     --gradient-end: 85 56% 51%;   /* #96C93D */
     
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    /* Green levels for GitHub chart - Light Theme */
+    --chart-git-1: 145 70% 90%;   /* very light green */
+    --chart-git-2: 145 65% 75%;   /* light green */
+    --chart-git-3: 145 60% 60%;   /* medium green */
+    --chart-git-4: 145 55% 45%;   /* dark green */
+
+    /* General chart colors - Light Theme */
+    --chart-1: 145 85% 58%; /* Primary Green */
+    --chart-2: 200 80% 60%; /* Sky Blue */
+    --chart-3: 30 90% 65%;  /* Orange */
+    --chart-4: 260 70% 70%; /* Lavender */
+    --chart-5: 340 85% 70%; /* Pink */
   }
 
   .dark {
@@ -59,7 +66,7 @@ body {
     --popover-rgb: 15, 18, 17; /* Roughly #0F1211 from 160 17% 8% for hsla usage */
     --popover: 160 17% 8%; /* Darker for popovers */
     --popover-foreground: 0 0% 95%;
-    --primary-rgb: 56, 239, 125; /* Added for #38EF7D in RGB */
+    --primary-rgb: 56, 239, 125; 
     --primary: 145 85% 58%; /* Green gradient middle #38EF7D */
     --primary-foreground: 160 17% 6%; /* Dark text for primary buttons */
     --secondary: 160 10% 15%; /* Darker gray for secondary elements */
@@ -75,11 +82,18 @@ body {
     --input: 0 0% 20%; /* Slightly lighter for input fields */
     --ring: 145 85% 58%; /* Green gradient middle for focus rings */
     
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    /* Green levels for GitHub chart - Dark Theme */
+    --chart-git-1: 142.6 80% 65%;   
+    --chart-git-2: 142.6 75% 61%;   
+    --chart-git-3: 142.6 70% 45%;  
+    --chart-git-4: 142.6 65% 35%;  
+
+    /* General chart colors - Dark Theme */
+    --chart-1: 145 85% 58%; /* Primary Green */
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
   }
 }
 
@@ -155,4 +169,12 @@ body {
 .scrollbar-thin {
   scrollbar-width: thin;
   scrollbar-color: hsl(var(--primary)) transparent; /* thumb and track */
+}
+
+.hide-native-scrollbar::-webkit-scrollbar {
+  display: none; /* For Webkit browsers */
+}
+.hide-native-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }

@@ -41,10 +41,10 @@ const loadingTextVariants = {
 // Adjusted opacity for better visibility of green shades
 const CONTRIBUTION_LEVEL_COLORS = [
   'hsl(var(--muted))', // 0 contributions
-  'hsla(var(--primary-rgb), 0.4)', // Level 1 (was 0.2)
-  'hsla(var(--primary-rgb), 0.6)', // Level 2 (was 0.4)
-  'hsla(var(--primary-rgb), 0.8)', // Level 3 (was 0.7)
-  'hsla(var(--primary-rgb), 1.0)', // Level 4 (Full Green, no change)
+  'hsla(var(--chart-git-1))', // Level 1 (was 0.2)
+  'hsla(var(--chart-git-2))', // Level 2 (was 0.4)
+  'hsla(var(--chart-git-3))', // Level 3 (was 0.7)
+  'hsla(var(--chart-git-4))', // Level 4 (Full Green, no change)
 ];
 
 const getContributionColor = (count: number, maxContributionsInPeriod: number = 10): string => {
@@ -226,7 +226,7 @@ export function GithubContributionsSection() {
                 asChild 
                 variant="outline" 
                 size="sm" 
-                className="gradient-button-outline"
+                // className="gradient-button-outline"
                 disabled={isLoading || githubUsername === "yourusername" || !githubUsername} // Added isLoading to disabled check
               >
                 <Link href={`https://github.com/${githubUsername}`} target="_blank" rel="noopener noreferrer">
