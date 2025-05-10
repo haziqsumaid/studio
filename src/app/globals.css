@@ -50,10 +50,12 @@ body {
     --gradient-end: 220 10% 10%;     /* Dark Gray (darker) */
     
     /* Updated Green levels for GitHub chart - Light Theme (now shades of gray-blue) */
+    --chart-git-0: hsl(var(--muted)); /* Explicitly use muted for 0 contributions */
     --chart-git-1: 220 10% 90%;   /* very light gray-blue */
     --chart-git-2: 220 10% 75%;   /* light gray-blue */
     --chart-git-3: 220 10% 60%;   /* medium gray-blue */
     --chart-git-4: 220 10% 45%;   /* dark gray-blue */
+
 
     /* General chart colors - Light Theme */
     --chart-1: 220 10% 15%; /* New Primary: Dark Slate Gray */
@@ -61,6 +63,13 @@ body {
     --chart-3: 30 90% 65%;  /* Orange (kept for diversity) */
     --chart-4: 260 70% 70%; /* Lavender (kept for diversity) */
     --chart-5: 340 85% 70%; /* Pink (kept for diversity) */
+
+    --radius: 0.5rem;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   }
 
   .dark {
@@ -93,10 +102,11 @@ body {
     --gradient-end: 85 56% 51%;   /* #96C93D */
     
     /* Green levels for GitHub chart - Dark Theme */
-    --chart-git-1: 142.6 80% 65%;   
-    --chart-git-2: 142.6 75% 61%;   
-    --chart-git-3: 142.6 70% 45%;  
-    --chart-git-4: 142.6 65% 35%;  
+    --chart-git-0: hsl(var(--muted)); /* Explicitly use muted for 0 contributions */
+    --chart-git-1: 145 85% 20%; /* Darkest green, barely visible */
+    --chart-git-2: 145 85% 35%;   
+    --chart-git-3: 145 85% 50%;  
+    --chart-git-4: 145 85% 65%; /* Brightest green */
 
     /* General chart colors - Dark Theme */
     --chart-1: 145 85% 58%; /* Primary Green */
@@ -104,6 +114,12 @@ body {
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.15);
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.2), 0 1px 2px -1px rgb(0 0 0 / 0.2);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.2), 0 2px 4px -2px rgb(0 0 0 / 0.2);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.25), 0 4px 6px -4px rgb(0 0 0 / 0.25);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.3), 0 8px 10px -6px rgb(0 0 0 / 0.3);
   }
 }
 
@@ -169,7 +185,7 @@ body {
   @apply bg-transparent;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  @apply bg-primary/50 rounded-full;
+  @apply bg-primary/70 rounded-full; /* Increased opacity */
 }
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   @apply bg-primary;
@@ -188,3 +204,12 @@ body {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+/* Added shadow-lg utility */
+.shadow-lg {
+  box-shadow: var(--shadow-lg);
+}
+.shadow-xl {
+  box-shadow: var(--shadow-xl);
+}
+
