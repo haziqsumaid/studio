@@ -13,6 +13,7 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 const navItems = [
   { id: 'home', href: '/', label: 'Home', isExternal: false },
   { id: 'about', href: '#about', label: 'About', isExternal: false },
+  { id: 'skills', href: '#skills', label: 'Skills', isExternal: false },
   { id: 'projects', href: '#projects', label: 'Projects', isExternal: false },
   { id: 'contributions', href: '#contributions', label: 'Contributions', isExternal: false },
   { id: 'contact', href: '#contact', label: 'Contact', isExternal: false },
@@ -48,10 +49,10 @@ export function Navbar() {
 
   return (
     <motion.header
-      initial={{ backgroundColor: 'hsla(var(--background), 0)' }}
+      initial={{ backgroundColor: 'hsla(var(--background-rgb), 0)' }} // Use background-rgb for hsla
       animate={{
-        backgroundColor: isScrolled ? 'hsla(var(--background), 0.6)' : 'hsla(var(--background), 0)', // Adjusted opacity
-        backdropFilter: isScrolled ? 'blur(8px)' : 'none', // Adjusted blur
+        backgroundColor: isScrolled ? 'hsla(var(--background-rgb), 0.6)' : 'hsla(var(--background-rgb), 0)', // Adjusted opacity
+        backdropFilter: isScrolled ? 'blur(8px)' : 'none', 
       }}
       transition={{ duration: 0.3 }}
       className={cn(

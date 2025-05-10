@@ -5,9 +5,10 @@ This is a personal portfolio website for a Senior Node.js Backend Developer & De
 ## Features
 
 - **Hero Section**: Full-viewport header with gradient-clipped name, subtitle, and CV download.
-- **About Me**: Professional photo, bio, and skills showcase.
+- **About Me**: Professional photo, bio, skill highlights, and interactive journey timeline.
+- **Skills Section**: Interactive radial display of technical skills with proficiency indicators and detailed chart views.
 - **Project Showcase**: Grid of backend-focused projects with details and links.
-- **GitHub Contributions**: Section to display GitHub activity (placeholder for now).
+- **GitHub Contributions**: Section to display GitHub activity (placeholder, requires API integration for real data).
 - **Contact Form**: Simple form to send messages (posts to a mock API).
 - **Responsive Design**: Adapts to all screen sizes, with a mobile-friendly navigation.
 - **Dark Mode Theme**: Sleek and modern dark aesthetic with green gradient accents.
@@ -16,6 +17,8 @@ This is a personal portfolio website for a Senior Node.js Backend Developer & De
 
 - **Front-end**: Next.js (App Router), React, TypeScript, Tailwind CSS
 - **Styling**: ShadCN UI components, CSS variables for theming
+- **Animation**: Framer Motion
+- **Charts**: Recharts
 - **Mock API**: Next.js API Routes for contact form
 
 ## Getting Started
@@ -51,8 +54,9 @@ This is a personal portfolio website for a Senior Node.js Backend Developer & De
     ```env
     # NEXT_PUBLIC_SITE_URL=http://localhost:3000 (for local dev)
     # NEXT_PUBLIC_SITE_URL=https://yourdomain.com (for production)
-    # GITHUB_USERNAME=yourgithubusername (optional, if you implement dynamic contributions)
+    NEXT_PUBLIC_GITHUB_USERNAME=yourgithubusername 
     ```
+    Replace `yourgithubusername` with your actual GitHub username for the GitHub Contributions section link and placeholder.
 
 4.  **Run the development server:**
     ```bash
@@ -128,12 +132,17 @@ pnpm typecheck
 
 ## Customization
 
-- **Content**: Update text ("Your Name", "yourusername", email), images, and project details in the respective components located in `src/components/sections/` and `src/components/Navbar.tsx`, `src/components/Footer.tsx`.
+- **Content**: 
+    - Update text ("Your Name", "yourusername", email), images, and project details in the respective components located in `src/components/sections/` and `src/components/Navbar.tsx`, `src/components/Footer.tsx`.
+    - Skills data can be customized in `src/config/skills.ts`. Update skill names, proficiency levels, experience, icons, and descriptions.
 - **CV**: Replace `public/placeholder-cv.pdf` with your actual CV.
 - **Social Links**: Update links in `src/components/Footer.tsx` and `src/components/sections/ContactSection.tsx`.
-- **GitHub Contributions**: The GitHub contributions section currently uses a placeholder image. To display your actual contributions, you can either:
-    - Replace the placeholder image in `src/components/sections/GithubContributionsSection.tsx` with an image of your contribution graph.
-    - Or, implement a feature to fetch and display your contributions dynamically (e.g., using an image URL like `https://ghchart.rshah.org/YOUR_GITHUB_USERNAME` or by fetching data from the GitHub API).
+- **GitHub Contributions**: 
+    - The GitHub contributions section currently uses a placeholder image and links to the GitHub username defined in `NEXT_PUBLIC_GITHUB_USERNAME` (see `.env.local` setup).
+    - To display your actual contributions dynamically (e.g., contribution graph, commits, merges), you'll need to:
+        1. Securely fetch data from the GitHub API. This typically involves creating a Next.js API route that uses a GitHub Personal Access Token (PAT) with appropriate permissions. **Do not expose your PAT on the client-side.**
+        2. Parse the API response and render the data. You might use a library like `octokit/rest.js` for GitHub API interaction.
+        3. For a visual contribution graph, services like `https://ghchart.rshah.org/` can generate an image, or you can build a custom chart.
 - **Domain & Metadata**:
     - Replace `https://yourdomain.com` in `public/sitemap.xml` and `src/app/layout.tsx` with your actual domain.
     - Update `YYYY-MM-DD` in `public/sitemap.xml` to the current date.
@@ -147,3 +156,4 @@ pnpm typecheck
 ## Deployment
 
 This project can be deployed to platforms like Vercel, Netlify, or any hosting provider that supports Node.js/Docker. A basic GitHub Actions workflow is provided in `.github/workflows/ci-cd.yml` for automated building and testing. You can extend this for deployment to your chosen platform.
+```
