@@ -1,18 +1,16 @@
 
-
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { motion, AnimatePresence, useReducedMotion, useAnimation, useScroll, useTransform } from 'framer-motion';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { motion, AnimatePresence, useReducedMotion, useAnimation, useSpring } from 'framer-motion';
 import { Section } from '@/components/Section';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Button } from '@/components/ui/button';
-import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend as RechartsLegend, Tooltip as RechartsTooltip, BarChart, XAxis, YAxis, Bar, Cell } from 'recharts';
+
+import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend as RechartsLegend, Tooltip as RechartsTooltip } from 'recharts';
 import { skillsData, skillCategories, type Skill, type SkillCategory } from '@/config/skills';
 import { cn } from '@/lib/utils';
-import { ChevronDown, PieChart, BarChartHorizontal, Star, Cpu } from 'lucide-react';
 import type { IconComponent } from '@/config/skills';
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -29,16 +27,15 @@ interface SkillBadgeProps {
   theme: string | undefined;
 }
 
-const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, radius, centerOffset = {x:0, y:0}, onHover, isReducedMotion, isSelected, theme }) => {
-  const angle = (index / totalSkills) * 2 * Math.PI - Math.PI / 2; // Start from top
+const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, radius, centerOffset = {x:0, y:0}, onHover, isReducedMotion, theme }) => {
+  const angle = (index / totalSkills) * 2 * Math.PI - Math.PI / 2; 
   const finalX = radius * Math.cos(angle) + centerOffset.x;
   const finalY = radius * Math.sin(angle) + centerOffset.y;
   
-  // For entry animation, start from center or a closer orbit if preferred
   const initialOrbitRadius = radius * 0.3; 
-  const initialAngle = angle + Math.PI / 4; // Start from a slightly offset angle for a swirling effect
-  const entryX = isReducedMotion ? finalX : initialOrbitRadius * Math.cos(initialAngle) + centerOffset.x;
-  const entryY = isReducedMotion ? finalY : initialOrbitRadius * Math.sin(initialAngle) + centerOffset.y;
+  const initialAngle = angle + Math.PI / 4; 
+  const entryX = initialOrbitRadius * Math.cos(initialAngle) + centerOffset.x;
+  const entryY = initialOrbitRadius * Math.sin(initialAngle) + centerOffset.y;
 
   const controls = useAnimation();
   const [isIntersecting, setIsIntersecting] = useState(false);
@@ -47,13 +44,9 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, radi
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && entry.boundingClientRect.top > 0) { // Check if element is in viewport and not above
+        if (entry.isIntersecting && entry.boundingClientRect.top > 0) { 
           setIsIntersecting(true);
-          if (!isReducedMotion) {
-            controls.start("visible");
-          } else {
-            controls.start({ opacity: 1, scale: 1, x: finalX, y: finalY, transition: { duration: 0 }});
-          }
+          controls.start("visible");
           observer.unobserve(entry.target);
         }
       },
@@ -69,9 +62,8 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, radi
       if (currentRef) {
         observer.unobserve(currentRef);
       }
-      observer.disconnect();
     };
-  }, [controls, finalX, finalY, isReducedMotion]);
+  }, [controls]);
 
   const badgeVariants = {
     initial: { 
@@ -83,7 +75,7 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, radi
     },
     visible: {
       opacity: 1,
-      scale: 1,
+      scale: 1, // Ensure target scale is 1
       x: finalX,
       y: finalY,
       rotate: 0,
@@ -93,12 +85,12 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, radi
       scale: 1.25,
       zIndex: 10,
       boxShadow: `0 0 20px 5px hsla(var(--primary), 0.5)`,
-      transition: { type: 'spring', stiffness: 300, damping: 10 },
+      // Transition for hover state itself is fine
     },
   };
   
   const progressRingVariants = {
-    hidden: { strokeDashoffset: 2 * Math.PI * 28 }, // 28 is radius of circle
+    hidden: { strokeDashoffset: 2 * Math.PI * 28 }, 
     visible: { 
       strokeDashoffset: 2 * Math.PI * 28 * (1 - skill.proficiency / 100),
       transition: { duration: isReducedMotion ? 0 : 1, ease: "easeOut", delay: isReducedMotion ? 0 : index * 0.07 + 0.8 }
@@ -113,11 +105,13 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, radi
       className="absolute cursor-pointer flex flex-col items-center group"
       variants={badgeVariants}
       initial="initial"
-      animate={controls} // Manages the transition to "visible" and reverts from "hover"
+      animate={controls}
       whileHover="hover"
       onHoverStart={() => onHover(skill)}
       onHoverEnd={() => onHover(null)}
-      style={{ width: 72, height: 72 }} // Fixed size for consistent layout
+      // Add a default transition to govern animations back from hover to visible state
+      transition={{ type: "spring", stiffness: 150, damping: 20 }}
+      style={{ width: 72, height: 72 }} 
       role="button"
       tabIndex={0}
       aria-label={`${skill.name} - ${skill.experience} experience, ${skill.proficiency}% proficiency`}
@@ -149,10 +143,12 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, radi
               <Icon size={28} className="text-primary group-hover:text-[hsl(var(--gradient-end))] transition-colors duration-200 z-10" />
             </div>
           </TooltipTrigger>
-          <TooltipContent side="top" className="bg-popover text-popover-foreground p-2 rounded-md shadow-lg border border-border text-xs">
+          <TooltipContent side="top" className="bg-popover text-popover-foreground p-2 rounded-md shadow-lg border border-border text-xs max-w-xs">
             <p className="font-bold gradient-text">{skill.name}</p>
-            <p>Proficiency: {skill.proficiency}%</p>
-            <p>Experience: {skill.experience}</p>
+            <p className="text-xs">Category: <span className="font-medium">{skill.category}</span></p>
+            <p className="text-xs">Proficiency: <span className="font-medium">{skill.proficiency}%</span></p>
+            <p className="text-xs">Experience: <span className="font-medium">{skill.experience}</span></p>
+            {skill.description && <p className="mt-1.5 text-muted-foreground/90 text-xs">{skill.description}</p>}
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -175,21 +171,21 @@ const SkillGalaxy: React.FC<{
   skills: Skill[];
   categories: SkillCategory[];
   onSkillHover: (skill: Skill | null) => void;
-  onSkillLeave: () => void;
   isReducedMotion: boolean;
   theme: string | undefined;
-}> = ({ skills, categories, onSkillHover, onSkillLeave, isReducedMotion, theme }) => {
+}> = ({ skills, categories, onSkillHover, isReducedMotion, theme }) => {
   const [containerSize, setContainerSize] = useState({ width: 500, height: 500 });
-  const containerRef = useRef<HTMLDivElement>(null);
+  const galaxyRef = useRef<HTMLDivElement>(null); // Ref for the galaxy container (badges orbit around this)
+  const radarChartContainerRef = useRef<HTMLDivElement>(null); // Ref for the radar chart's direct parent
 
   useEffect(() => {
     const updateSize = () => {
-      if (containerRef.current) {
-        const { clientWidth, clientHeight } = containerRef.current;
-        const smallerDim = Math.min(clientWidth, clientHeight);
-        // Ensure a minimum size for very small containers to prevent badges from collapsing into the center
-        const effectiveSize = Math.max(smallerDim, 300); // Minimum effective size of 300px
-        setContainerSize({ width: effectiveSize * 0.9, height: effectiveSize * 0.9 });
+      if (galaxyRef.current) {
+        const { clientWidth, clientHeight } = galaxyRef.current;
+        // Use the larger dimension for radius calculation to ensure badges fit well
+        const largerDim = Math.max(clientWidth, clientHeight); 
+        const effectiveSize = Math.max(largerDim, 400); // Minimum effective size
+        setContainerSize({ width: effectiveSize * 0.95, height: effectiveSize * 0.95 });
       }
     };
     updateSize();
@@ -197,8 +193,9 @@ const SkillGalaxy: React.FC<{
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
-  const radius = containerSize.width * 0.45; // Increased radius for badges
-  const centerOffset = { x: 0, y: 0 }; // Galaxy is centered in its container
+  // Radius for skill badges, relative to the galaxy container size
+  const radius = Math.min(containerSize.width, containerSize.height) * 0.38; // Adjusted for better spacing with central chart
+  const centerOffset = { x: 0, y: 0 }; 
 
   const radarChartData = useMemo(() => {
     return categories.map(category => {
@@ -215,15 +212,18 @@ const SkillGalaxy: React.FC<{
   }, [skills, categories]);
 
   return (
-    <div ref={containerRef} className="w-full h-full relative flex items-center justify-center">
-      {/* Radar Chart in the center */}
-      <motion.div 
-        className="absolute inset-0 flex items-center justify-center pointer-events-auto" // Changed pointer-events to auto
+    // Main container for the entire galaxy and chart area
+    <div ref={galaxyRef} className="w-full h-full relative flex items-center justify-center">
+      {/* Radar Chart Container - positioned absolutely in the center of galaxyRef */}
+      <motion.div
+        ref={radarChartContainerRef}
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0" // Centering the chart container
+        style={{ width: '55%', height: '55%' }} // Explicit size for the chart container
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1, transition: { delay: isReducedMotion ? 0 : 0.5, duration: 0.8, ease: "circOut" } }}
       >
-        <ResponsiveContainer width="70%" height="70%"> {/* Increased radar chart size slightly */}
-          <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarChartData}> {/* Adjusted outerRadius for radar */}
+        <ResponsiveContainer width="100%" height="100%">
+          <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarChartData}> {/* outerRadius relative to its container */}
             <PolarGrid stroke={theme === 'dark' ? "hsl(var(--border)/0.3)" : "hsl(var(--muted)/0.5)"} />
             <PolarAngleAxis 
               dataKey="subject" 
@@ -261,15 +261,15 @@ const SkillGalaxy: React.FC<{
         </ResponsiveContainer>
       </motion.div>
 
-      {/* Skill Badges Orbiting */}
+      {/* Skill Badges Orbiting - positioned relative to galaxyRef */}
       {skills.map((skill, index) => (
         <SkillBadge
           key={skill.id}
           skill={skill}
           index={index}
           totalSkills={skills.length}
-          radius={radius}
-          centerOffset={centerOffset}
+          radius={radius} // Use the calculated radius
+          centerOffset={centerOffset} // Badges orbit the center of galaxyRef
           onHover={onSkillHover}
           isReducedMotion={isReducedMotion}
           isSelected={false} 
@@ -285,7 +285,7 @@ export function SkillsSection() {
   const [activeSkill, setActiveSkill] = useState<Skill | null>(null);
   const [isClient, setIsClient] = useState(false);
   const framerReducedMotion = useReducedMotion();
-  const [isReducedMotionActive, setIsReducedMotionActive] = useState(true); // Default to true for SSR
+  const [isReducedMotionActive, setIsReducedMotionActive] = useState(true); 
   const [isMobileView, setIsMobileView] = useState(false);
   const { theme } = useTheme(); 
 
@@ -304,15 +304,6 @@ export function SkillsSection() {
     visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.2 } },
   };
 
-  const chartData = useMemo(() => {
-    // For Bar Chart: top 5 skills by proficiency, or all if less than 5
-    const sortedSkills = [...skillsData].sort((a, b) => b.proficiency - a.proficiency);
-    return sortedSkills.slice(0, 5).map(skill => ({
-        name: skill.name,
-        proficiency: skill.proficiency,
-        fill: `hsl(var(--chart-${(skillsData.indexOf(skill) % 5) + 1}))` // Use chart colors from globals.css
-    }));
-  }, []);
 
   if (!isClient) {
     return (
@@ -331,7 +322,6 @@ export function SkillsSection() {
         viewport={{ once: true, amount: 0.05 }}
       >
       {isMobileView ? (
-        // Mobile View: Accordion
         <Accordion type="single" collapsible className="w-full space-y-4">
           {skillCategories.map((category) => (
             <AccordionItem key={category.name} value={category.name} className="bg-card/60 backdrop-blur-md border-border/30 shadow-lg rounded-lg">
@@ -387,7 +377,6 @@ export function SkillsSection() {
           ))}
         </Accordion>
       ) : (
-        // Desktop View: Skill Galaxy with Central Radar Chart
         <div className="relative flex flex-col items-center justify-center w-full min-h-[650px] md:min-h-[750px] lg:min-h-[850px]">
             <AnimatePresence>
               {activeSkill && (
@@ -404,7 +393,7 @@ export function SkillsSection() {
                         {React.createElement(activeSkill.icon, { size: 24, className: "mr-2" })}
                         {activeSkill.name}
                       </CardTitle>
-                      <CardDescription>Category: {activeSkill.category}</CardDescription>
+                       <CardDescription>Category: {activeSkill.category}</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <p className="text-sm text-muted-foreground mb-1">Experience: {activeSkill.experience}</p>
@@ -421,7 +410,6 @@ export function SkillsSection() {
                 skills={skillsData}
                 categories={skillCategories}
                 onSkillHover={setActiveSkill}
-                onSkillLeave={() => setActiveSkill(null)}
                 isReducedMotion={isReducedMotionActive}
                 theme={theme}
               />
@@ -432,3 +420,5 @@ export function SkillsSection() {
     </Section>
   );
 }
+
+    
