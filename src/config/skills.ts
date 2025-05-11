@@ -1,3 +1,4 @@
+
 import {
   Codepen,
   Github,
@@ -36,6 +37,10 @@ import {
   Gauge,
   Wrench,
   type LucideProps,
+  Package,
+  Brain,
+  Scaling,
+  LayoutPanelLeft,
 } from 'lucide-react';
 import type { ForwardRefExoticComponent, RefAttributes } from 'react';
 
@@ -56,11 +61,17 @@ export interface Skill {
 
 export interface SkillCategory {
   name: SkillCategoryName;
-  icon: IconComponent;
+  icon: IconComponent; // Icon for the category itself (e.g., for accordion headers)
   description: string;
 }
 
-export type SkillCategoryName = "Backend Development" | "DevOps & Cloud" | "Databases" | "Tools & Technologies" | "Frontend Familiarity";
+export type SkillCategoryName = 
+  | "Backend Development" 
+  | "DevOps & Cloud" 
+  | "Databases" 
+  | "Tools & Technologies" 
+  | "Frontend Familiarity"
+  | "AI/ML Engineering";
 
 export const skillCategories: SkillCategory[] = [
   {
@@ -85,8 +96,13 @@ export const skillCategories: SkillCategory[] = [
   },
   {
     name: "Frontend Familiarity",
-    icon: Palette,
+    icon: LayoutPanelLeft,
     description: "Comfortable working with frontend technologies to build cohesive full-stack solutions."
+  },
+  {
+    name: "AI/ML Engineering",
+    icon: Brain,
+    description: "Experience in developing and deploying AI/ML models and solutions."
   }
 ];
 
@@ -95,7 +111,7 @@ export const skillsData: Skill[] = [
   {
     id: 'nodejs',
     name: 'Node.js',
-    icon: Codepen, // Using Codepen as a generic "code" icon; consider a Node.js specific SVG if available/needed
+    icon: Package, 
     proficiency: 95,
     experience: '6+ Years',
     category: 'Backend Development',
@@ -105,7 +121,7 @@ export const skillsData: Skill[] = [
   {
     id: 'typescript',
     name: 'TypeScript',
-    icon: Sparkles, // Placeholder - no direct Lucide icon for TS
+    icon: Codepen, // Using Codepen as it often features TS snippets. Could be generic 'code' icon too.
     proficiency: 90,
     experience: '5+ Years',
     category: 'Backend Development',
@@ -115,7 +131,7 @@ export const skillsData: Skill[] = [
   {
     id: 'express',
     name: 'Express.js',
-    icon: Layers,
+    icon: Layers, // Represents middleware layers
     proficiency: 90,
     experience: '5+ Years',
     category: 'Backend Development',
@@ -125,7 +141,7 @@ export const skillsData: Skill[] = [
   {
     id: 'nestjs',
     name: 'NestJS',
-    icon: Briefcase, // Placeholder
+    icon: Briefcase, // Often associated with professional/structured frameworks
     proficiency: 80,
     experience: '3+ Years',
     category: 'Backend Development',
@@ -134,8 +150,8 @@ export const skillsData: Skill[] = [
   },
   {
     id: 'api-design',
-    name: 'API Design',
-    icon: Share2,
+    name: 'API Design (REST & GraphQL)',
+    icon: Share2, // Represents connections/interfaces
     proficiency: 92,
     experience: '6+ Years',
     category: 'Backend Development',
@@ -145,7 +161,7 @@ export const skillsData: Skill[] = [
   {
     id: 'graphql',
     name: 'GraphQL',
-    icon: GitMerge, // Placeholder
+    icon: GitMerge, // Placeholder, represents structured queries merging data
     proficiency: 75,
     experience: '2+ Years',
     category: 'Backend Development',
@@ -167,7 +183,7 @@ export const skillsData: Skill[] = [
   {
     id: 'kubernetes',
     name: 'Kubernetes (K8s)',
-    icon: Settings, // Placeholder, K8s logo is specific
+    icon: Settings, // Represents complex orchestration/configuration
     proficiency: 80,
     experience: '4+ Years',
     category: 'DevOps & Cloud',
@@ -177,7 +193,7 @@ export const skillsData: Skill[] = [
   {
     id: 'aws',
     name: 'AWS',
-    icon: Cloud,
+    icon: Cloud, // Direct representation
     proficiency: 88,
     experience: '5+ Years',
     category: 'DevOps & Cloud',
@@ -187,7 +203,7 @@ export const skillsData: Skill[] = [
   {
     id: 'ci-cd',
     name: 'CI/CD Pipelines',
-    icon: GitMerge,
+    icon: GitMerge, // Represents merging and flowing code
     proficiency: 92,
     experience: '5+ Years',
     category: 'DevOps & Cloud',
@@ -197,7 +213,7 @@ export const skillsData: Skill[] = [
   {
     id: 'terraform',
     name: 'Terraform',
-    icon: Layers, // Placeholder
+    icon: Layers, // Represents infrastructure layers
     proficiency: 85,
     experience: '3+ Years',
     category: 'DevOps & Cloud',
@@ -207,7 +223,7 @@ export const skillsData: Skill[] = [
    {
     id: 'aws-eks',
     name: 'AWS EKS',
-    icon: Settings,
+    icon: Scaling, // Represents scaling Kubernetes clusters
     proficiency: 78,
     experience: '3+ Years',
     category: 'DevOps & Cloud',
@@ -229,7 +245,7 @@ export const skillsData: Skill[] = [
   {
     id: 'postgresql',
     name: 'PostgreSQL',
-    icon: Database,
+    icon: Database, // Could use a variant if desired, but Database is generic enough
     proficiency: 85,
     experience: '4+ Years',
     category: 'Databases',
@@ -249,7 +265,7 @@ export const skillsData: Skill[] = [
   {
     id: 'git',
     name: 'Git',
-    icon: Github,
+    icon: Github, // Direct representation
     proficiency: 98,
     experience: '7+ Years',
     category: 'Tools & Technologies',
@@ -258,7 +274,7 @@ export const skillsData: Skill[] = [
   {
     id: 'linux',
     name: 'Linux/Unix',
-    icon: Terminal,
+    icon: Terminal, // Represents command-line interface
     proficiency: 90,
     experience: '7+ Years',
     category: 'Tools & Technologies',
@@ -267,7 +283,7 @@ export const skillsData: Skill[] = [
   {
     id: 'nginx',
     name: 'Nginx',
-    icon: Server,
+    icon: Server, // Represents server software
     proficiency: 82,
     experience: '4+ Years',
     category: 'Tools & Technologies',
@@ -278,7 +294,7 @@ export const skillsData: Skill[] = [
   {
     id: 'react',
     name: 'React.js',
-    icon: Sparkles, // Placeholder
+    icon: Sparkles, // Represents modern UI/dynamic components
     proficiency: 70,
     experience: '3+ Years',
     category: 'Frontend Familiarity',
@@ -288,21 +304,70 @@ export const skillsData: Skill[] = [
   {
     id: 'tailwind',
     name: 'Tailwind CSS',
-    icon: Palette,
+    icon: Palette, // Represents styling/design
     proficiency: 65,
     experience: '2+ Years',
     category: 'Frontend Familiarity',
     description: 'Comfortable styling applications with Tailwind CSS for rapid UI development.',
-  }
+  },
+  // AI/ML Engineering
+  {
+    id: 'python',
+    name: 'Python',
+    icon: Codepen, // General coding icon, Python logo is specific
+    proficiency: 85,
+    experience: '4+ Years',
+    category: 'AI/ML Engineering',
+    description: 'Developing ML models and data processing scripts using Python and its rich ecosystem (NumPy, Pandas, Scikit-learn).',
+    relatedSkills: ['scikit-learn', 'tensorflow', 'pytorch']
+  },
+  {
+    id: 'tensorflow',
+    name: 'TensorFlow',
+    icon: Brain, // Represents neural networks/deep learning
+    proficiency: 70,
+    experience: '2+ Years',
+    category: 'AI/ML Engineering',
+    description: 'Building and training deep learning models with TensorFlow for various AI applications.',
+    relatedSkills: ['python', 'keras']
+  },
+  {
+    id: 'pytorch',
+    name: 'PyTorch',
+    icon: Cpu, // Often used for GPU accelerated tasks in ML
+    proficiency: 75,
+    experience: '2+ Years',
+    category: 'AI/ML Engineering',
+    description: 'Experience with PyTorch for flexible research and development of deep learning models.',
+    relatedSkills: ['python']
+  },
+  {
+    id: 'scikit-learn',
+    name: 'Scikit-learn',
+    icon: Gauge, // Represents model evaluation/metrics
+    proficiency: 80,
+    experience: '3+ Years',
+    category: 'AI/ML Engineering',
+    description: 'Utilizing Scikit-learn for classical machine learning tasks, model selection, and preprocessing.',
+    relatedSkills: ['python']
+  },
 ];
-
 
 // Define relationships for constellation lines (desktop only)
 // This is a simplified representation; actual line drawing would need coordinates.
 export const skillRelationships: { [key: string]: string[] } = {
-  'nodejs': ['typescript', 'express', 'nestjs', 'api-design', 'graphql', 'docker'],
-  'docker': ['kubernetes', 'aws', 'ci-cd', 'nodejs'],
-  'aws': ['docker', 'kubernetes', 'ci-cd', 'terraform', 'aws-eks', 'mongodb', 'postgresql'],
-  'ci-cd': ['docker', 'kubernetes', 'aws', 'github', 'terraform'],
-  'kubernetes': ['docker', 'aws', 'aws-eks', 'terraform'],
+  'nodejs': ['typescript', 'express', 'nestjs', 'api-design', 'graphql', 'docker', 'mongodb', 'postgresql'],
+  'docker': ['kubernetes', 'aws', 'ci-cd', 'nodejs', 'python'],
+  'aws': ['docker', 'kubernetes', 'ci-cd', 'terraform', 'aws-eks', 'mongodb', 'postgresql', 'sagemaker'],
+  'ci-cd': ['docker', 'kubernetes', 'aws', 'github', 'terraform', 'linux'],
+  'kubernetes': ['docker', 'aws', 'aws-eks', 'terraform', 'ci-cd'],
+  'python': ['scikit-learn', 'tensorflow', 'pytorch', 'docker'],
+  'typescript': ['nodejs', 'nestjs', 'react'],
+  'tensorflow': ['python', 'keras'], // Assuming Keras might be another skill or implied
+  'pytorch': ['python'],
+  'scikit-learn': ['python'],
+  'git': ['github', 'ci-cd'], // GitHub is a platform using Git
+  'mongodb': ['nodejs', 'aws'],
+  'postgresql': ['nodejs', 'aws'],
+  'react': ['typescript', 'tailwind'],
 };
