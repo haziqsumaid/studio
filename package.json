@@ -1,3 +1,4 @@
+
 {
   "name": "nextn",
   "version": "0.1.0",
@@ -40,6 +41,7 @@
     "framer-motion": "^11.2.10",
     "lucide-react": "^0.475.0",
     "next": "15.2.3",
+    "nodemailer": "^6.9.14",
     "patch-package": "^8.0.0",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
@@ -54,6 +56,7 @@
   "devDependencies": {
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@types/node": "^20",
+    "@types/nodemailer": "^6.4.15",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "postcss": "^8",
