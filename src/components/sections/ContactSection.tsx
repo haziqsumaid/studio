@@ -1,7 +1,8 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,8 +22,7 @@ import { Github, Linkedin, Twitter, Send } from 'lucide-react';
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from 'react';
-import { siteConfig } from "@/config/content";
-import { cn } from "@/lib/utils";
+
 
 const contactFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -36,59 +36,15 @@ const iconHoverVariants = {
   hover: {
     scale: 1.2,
     color: "hsl(var(--primary))",
-    backgroundColor: "hsla(var(--accent-rgb), 0.1)", // Use accent-rgb for hsla
+    backgroundColor: "hsla(var(--accent-rgb), 0.2)",
     transition: { type: "spring", stiffness: 300 }
   },
   initial: {
     scale: 1,
-    color: "hsl(var(--muted-fg))",
+    color: "hsl(var(--muted-foreground))",
     backgroundColor: "transparent",
   }
 };
-
-const FloatingLabelInput = ({ field, label, placeholder, type = "text", error }: any) => (
-  <div className="relative">
-    <Input
-      {...field}
-      type={type}
-      placeholder=" " // Important: must be a space for :placeholder-shown to work
-      className={cn(
-        "peer pt-6 bg-bg border transition-colors", // bg-bg for themed background
-        error ? "border-destructive focus-visible:ring-destructive" : "border-input focus-visible:ring-ring"
-      )}
-    />
-    <FormLabel
-      className={cn(
-        "absolute left-3 top-1/2 -translate-y-1/2 text-muted-fg transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-focus:top-3 peer-focus:-translate-y-0 peer-focus:text-xs peer-focus:text-primary",
-        field.value && "top-3 -translate-y-0 text-xs text-primary" // Handle filled state
-      )}
-    >
-      {label}
-    </FormLabel>
-  </div>
-);
-
-const FloatingLabelTextarea = ({ field, label, placeholder, error }: any) => (
-  <div className="relative">
-    <Textarea
-      {...field}
-      placeholder=" "
-      rows={5}
-      className={cn(
-        "peer pt-6 bg-bg border transition-colors min-h-[120px]", // bg-bg
-        error ? "border-destructive focus-visible:ring-destructive" : "border-input focus-visible:ring-ring"
-      )}
-    />
-    <FormLabel
-      className={cn(
-        "absolute left-3 top-5 -translate-y-1/2 text-muted-fg transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] peer-placeholder-shown:top-5 peer-placeholder-shown:text-base peer-focus:top-3 peer-focus:-translate-y-0 peer-focus:text-xs peer-focus:text-primary",
-         field.value && "top-3 -translate-y-0 text-xs text-primary"
-      )}
-    >
-      {label}
-    </FormLabel>
-  </div>
-);
 
 
 export function ContactSection() {
@@ -122,45 +78,42 @@ export function ContactSection() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Network response was not ok');
+        throw new Error('Network response was not ok');
       }
 
       toast({
-        title: siteConfig.contact.successToastTitle,
-        description: siteConfig.contact.successToastDescription,
-        variant: 'default', // Explicitly success, can add custom variant later
-        duration: 5000,
+        title: "Message Sent!",
+        description: "Thanks for reaching out. I'll get back to you soon.",
       });
       form.reset();
-    } catch (error: any) {
+    } catch (error) {
       toast({
-        title: siteConfig.contact.errorToastTitle,
-        description: error.message || siteConfig.contact.errorToastDescription,
+        title: "Uh oh! Something went wrong.",
+        description: "There was a problem sending your message. Please try again.",
         variant: "destructive",
-        duration: 7000,
       });
     }
   }
-  
-  const buttonTapAnimation = isReducedMotionActive ? {} : { scale: 0.95 };
 
   return (
-    <Section id="contact" title={siteConfig.contact.heading}>
+    <Section id="contact" title="Get In Touch">
       <div className="grid md:grid-cols-2 gap-12">
-        <Card className="bg-card/50 backdrop-blur-sm shadow-lg">
+        <Card className="bg-card/50 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="text-2xl gradient-text">{siteConfig.contact.formTitle}</CardTitle>
+            <CardTitle className="text-2xl gradient-text">Send a Message</CardTitle>
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8"> {/* Increased space-y */}
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <FormField
                   control={form.control}
                   name="name"
-                  render={({ field, fieldState }) => (
+                  render={({ field }) => (
                     <FormItem>
-                      <FloatingLabelInput field={field} label={siteConfig.contact.nameLabel} placeholder={siteConfig.contact.namePlaceholder} error={fieldState.error} />
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Your Name" {...field} className="bg-input/50" />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -168,9 +121,12 @@ export function ContactSection() {
                 <FormField
                   control={form.control}
                   name="email"
-                  render={({ field, fieldState }) => (
+                  render={({ field }) => (
                     <FormItem>
-                       <FloatingLabelInput field={field} type="email" label={siteConfig.contact.emailLabel} placeholder={siteConfig.contact.emailPlaceholder} error={fieldState.error} />
+                      <FormLabel>Email Address</FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder="your.email@example.com" {...field} className="bg-input/50" />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -178,47 +134,44 @@ export function ContactSection() {
                 <FormField
                   control={form.control}
                   name="message"
-                  render={({ field, fieldState }) => (
+                  render={({ field }) => (
                     <FormItem>
-                      <FloatingLabelTextarea field={field} label={siteConfig.contact.messageLabel} placeholder={siteConfig.contact.messagePlaceholder} error={fieldState.error}/>
+                      <FormLabel>Your Message</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Let's talk about..." rows={5} {...field} className="bg-input/50" />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <motion.div whileTap={buttonTapAnimation}>
-                  <Button type="submit" className="w-full gradient-button text-lg py-3" disabled={form.formState.isSubmitting}>
-                    {form.formState.isSubmitting ? siteConfig.contact.submittingText : (
-                      <>
-                        <Send size={18} className="mr-2"/>{siteConfig.contact.submitButtonText}
-                      </>
-                    )}
-                  </Button>
-                </motion.div>
+                <Button type="submit" className="w-full gradient-button" disabled={form.formState.isSubmitting}>
+                  {form.formState.isSubmitting ? "Sending..." : <><Send size={18} className="mr-2"/>Send Message</>}
+                </Button>
               </form>
             </Form>
           </CardContent>
         </Card>
         <div className="space-y-8 flex flex-col justify-center">
           <div>
-            <h3 className="text-subheadline-md text-fg mb-4">{siteConfig.contact.connectTitle}</h3>
-            <p className="text-muted-fg mb-2">{siteConfig.contact.connectDescription}</p>
-            <a href={`mailto:${siteConfig.email}`} className="text-lg gradient-text font-medium hover:underline">{siteConfig.email}</a>
+            <h3 className="text-2xl font-semibold text-foreground mb-4">Contact Information</h3>
+            <p className="text-muted-foreground mb-2">Feel free to reach out via email or connect with me on social media.</p>
+            <p className="text-lg gradient-text font-medium">your.email@example.com</p>
           </div>
           <div>
-            <h3 className="text-subheadline-md text-fg mb-4">Socials</h3>
+            <h3 className="text-2xl font-semibold text-foreground mb-4">Connect With Me</h3>
             <div className="flex space-x-4">
               <motion.div initial="initial" whileHover="hover" variants={variants} className="p-2 rounded-full">
-                <Link href={siteConfig.socialLinks.github} target="_blank" rel="noopener noreferrer" >
+                <Link href="https://github.com/yourusername" target="_blank" rel="noopener noreferrer" >
                   <Github size={32} /> <span className="sr-only">GitHub</span>
                 </Link>
               </motion.div>
               <motion.div initial="initial" whileHover="hover" variants={variants} className="p-2 rounded-full">
-                <Link href={siteConfig.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" >
+                <Link href="https://linkedin.com/in/yourusername" target="_blank" rel="noopener noreferrer" >
                   <Linkedin size={32} /> <span className="sr-only">LinkedIn</span>
                 </Link>
               </motion.div>
               <motion.div initial="initial" whileHover="hover" variants={variants} className="p-2 rounded-full">
-                <Link href={siteConfig.socialLinks.twitter} target="_blank" rel="noopener noreferrer" >
+                <Link href="https://twitter.com/yourusername" target="_blank" rel="noopener noreferrer" >
                   <Twitter size={32} /> <span className="sr-only">Twitter</span>
                 </Link>
               </motion.div>
