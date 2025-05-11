@@ -40,7 +40,7 @@ import {
 import type { ForwardRefExoticComponent, RefAttributes } from 'react';
 
 // Helper type for Lucide icons
-type IconComponent = ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>;
+export type IconComponent = ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>;
 
 
 export interface Skill {

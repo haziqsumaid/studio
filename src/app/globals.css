@@ -213,3 +213,55 @@ body {
   box-shadow: var(--shadow-xl);
 }
 
+/* Custom Tooltip Arrow Styling */
+.custom-tooltip-content {
+  @apply bg-popover/80 backdrop-blur-md text-popover-foreground p-3 rounded-lg shadow-xl border border-border/30 relative;
+}
+
+/* Arrow for tooltips appearing above the trigger */
+.custom-tooltip-content.tooltip-arrow-top::before {
+  content: "";
+  position: absolute;
+  top: 100%; /* Arrow at the bottom of the tooltip, pointing down to the trigger */
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: hsl(var(--popover)) transparent transparent transparent; /* Arrow points down */
+}
+
+/* Arrow for tooltips appearing below the trigger */
+.custom-tooltip-content.tooltip-arrow-bottom::before {
+  content: "";
+  position: absolute;
+  bottom: 100%; /* Arrow at the top of the tooltip, pointing up to the trigger */
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent transparent hsl(var(--popover)) transparent; /* Arrow points up */
+}
+
+/* Arrow for tooltips appearing to the left of the trigger */
+.custom-tooltip-content.tooltip-arrow-left::before {
+  content: "";
+  position: absolute;
+  left: 100%; /* Arrow at the right of the tooltip, pointing left to the trigger */
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent transparent transparent hsl(var(--popover)); /* Arrow points left */
+}
+
+/* Arrow for tooltips appearing to the right of the trigger */
+.custom-tooltip-content.tooltip-arrow-right::before {
+  content: "";
+  position: absolute;
+  right: 100%; /* Arrow at the left of the tooltip, pointing right to the trigger */
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent hsl(var(--popover)) transparent transparent; /* Arrow points right */
+}
