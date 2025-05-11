@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence, useReducedMotion, useAnimation, useSpring } from 'framer-motion';
 import { Section } from '@/components/Section';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Tooltip as RechartsTooltip } from 'recharts';
@@ -21,8 +21,9 @@ interface SkillBadgeProps {
   index: number;
   totalSkills: number;
   orbitRadius: number;
-  centerOffset: { x: number; y: number };
   iconSize: number;
+  initialX: number; // Initial offset from center for animation start
+  initialY: number; // Initial offset from center for animation start
   onHover: (skill: Skill | null) => void;
   onCategoryHover: (category: SkillCategoryName | null) => void;
   isReducedMotion: boolean;
@@ -30,22 +31,22 @@ interface SkillBadgeProps {
 }
 
 const SkillBadge: React.FC<SkillBadgeProps> = ({ 
-  skill, index, totalSkills, orbitRadius, centerOffset, iconSize, 
+  skill, index, totalSkills, orbitRadius, iconSize, initialX, initialY,
   onHover, onCategoryHover, isReducedMotion, theme 
 }) => {
-  const angle = (index / totalSkills) * 2 * Math.PI - Math.PI / 2;
-  const finalX = orbitRadius * Math.cos(angle) + centerOffset.x;
-  const finalY = orbitRadius * Math.sin(angle) + centerOffset.y;
+  const angle = (index / totalSkills) * 2 * Math.PI - Math.PI / 2; // -Math.PI/2 to start from top
+  const xPos = orbitRadius * Math.cos(angle); // Final x-offset from center
+  const yPos = orbitRadius * Math.sin(angle); // Final y-offset from center
 
   const controls = useAnimation();
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [isBadgeHovered, setIsBadgeHovered] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  const springX = useSpring(centerOffset.x, { damping: 15, stiffness: 80, mass: 0.5 });
-  const springY = useSpring(centerOffset.y, { damping: 15, stiffness: 80, mass: 0.5 });
-  const springScale = useSpring(0.3, { damping: 15, stiffness: 100 });
-  const springOpacity = useSpring(0, { damping: 20, stiffness: 100 });
+  const springX = useSpring(initialX, { damping: 15, stiffness: 80, mass: 0.5 });
+  const springY = useSpring(initialY, { damping: 15, stiffness: 80, mass: 0.5 });
+  const springScale = useSpring(isReducedMotion ? 1 : 0.3, { damping: 15, stiffness: 100 });
+  const springOpacity = useSpring(isReducedMotion ? 1: 0, { damping: 20, stiffness: 100 });
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -53,14 +54,14 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({
         if (entry.isIntersecting && !isIntersecting && entry.boundingClientRect.top > 0) { 
           setIsIntersecting(true);
           if (!isReducedMotion) {
-            setTimeout(() => {
-              springX.set(finalX);
-              springY.set(finalY);
-              springScale.set(1);
-              springOpacity.set(1);
-            }, index * 80); 
+            // Animate to final orbital position
+            springX.set(xPos);
+            springY.set(yPos);
+            springScale.set(1);
+            springOpacity.set(1);
           } else {
-            controls.start({ opacity: 1, scale: 1, x: finalX, y: finalY, transition: { duration: 0 }});
+            // Set directly if reduced motion
+            controls.start({ opacity: 1, scale: 1, x: xPos, y: yPos, transition: { duration: 0 }});
           }
         }
       },
@@ -70,39 +71,48 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({
     const currentRef = ref.current;
     if (currentRef) {
       observer.observe(currentRef);
-       controls.start({ 
-        x: centerOffset.x, 
-        y: centerOffset.y, 
-        scale: isReducedMotion ? 1: 0.3, 
-        opacity: isReducedMotion ? 1: 0,
-        transition: { duration: 0 } 
-      });
+      if (isReducedMotion) { // Set initial state for reduced motion if not intersecting yet
+         controls.start({ opacity: 1, scale: 1, x: xPos, y: yPos, transition: { duration: 0 }});
+      } else { // Set initial spring values for animation from center
+        springX.set(initialX);
+        springY.set(initialY);
+        springScale.set(0.3);
+        springOpacity.set(0);
+      }
     }
     return () => {
       if (currentRef) observer.unobserve(currentRef);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isReducedMotion, finalX, finalY, centerOffset.x, centerOffset.y, springX, springY, springScale, springOpacity, controls, index]);
+  }, [isReducedMotion, xPos, yPos, springX, springY, springScale, springOpacity, controls, initialX, initialY, isIntersecting]);
 
 
-  const badgeStyle = isReducedMotion ? { x: finalX, y: finalY } : {
-    x: springX,
-    y: springY,
-    scale: springScale,
-    opacity: springOpacity,
-  };
+  const badgeStyle = isReducedMotion 
+    ? { x: xPos, y: yPos, translateX: '-50%', translateY: '-50%' } 
+    : { 
+        x: springX, 
+        y: springY, 
+        translateX: '-50%', 
+        translateY: '-50%', 
+        scale: springScale, 
+        opacity: springOpacity 
+      };
 
   const progressRingRadius = iconSize + 4; 
   const progressRingCircumference = 2 * Math.PI * progressRingRadius;
-
   const Icon = skill.icon as IconComponent;
+
+  const badgeVisualWidth = (iconSize + 12) * 2 + 16;
+  const badgeVisualHeight = (iconSize + 12) * 2 + 30; // Includes text below
 
   const handleMouseEnter = () => {
     setIsBadgeHovered(true);
     onHover(skill);
     onCategoryHover(skill.category);
     if (!isReducedMotion) {
-      controls.start({ scale: 1.15, zIndex: 20, rotate: (Math.random() -0.5) * 10, transition: { type: 'spring', stiffness: 300, damping: 10 } });
+      // Animate scale and zIndex on hover, not full controls.start
+      springScale.set(1.15); 
+      // controls.start({ zIndex:20 }) // zIndex can be set directly if needed or use a separate motion value
     }
   };
 
@@ -111,7 +121,8 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({
     onHover(null);
     onCategoryHover(null);
     if (!isReducedMotion) {
-      controls.start({ scale: 1, zIndex: 1, rotate:0, transition: { type: 'spring', stiffness: 300, damping: 15 } });
+      springScale.set(1); // Return to normal scale
+      // controls.start({ zIndex:1 })
     }
   };
   
@@ -121,9 +132,14 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({
   return (
     <motion.div
       ref={ref}
-      className="absolute cursor-pointer flex flex-col items-center group"
-      style={{ ...badgeStyle, width: (iconSize + 12) * 2 + 16, height: (iconSize + 12) * 2 + 30 }} // Adjusted for consistent layout box
-      animate={controls}
+      className="absolute left-1/2 top-1/2 cursor-pointer flex flex-col items-center group"
+      style={{ 
+        ...badgeStyle, 
+        width: badgeVisualWidth, 
+        height: badgeVisualHeight,
+        zIndex: isBadgeHovered ? 20 : 1 // Manage zIndex based on hover state
+      }}
+      animate={controls} // Used for initial reduced motion direct set
       onHoverStart={handleMouseEnter}
       onHoverEnd={handleMouseLeave}
       onFocus={handleFocus}
@@ -137,11 +153,10 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({
           <TooltipTrigger asChild>
             <motion.div 
               className="relative p-1 rounded-full border-2 border-transparent group-hover:border-primary/50 transition-colors duration-200 flex items-center justify-center bg-card/60 backdrop-blur-sm"
-              style={{ width: (iconSize + 12) * 2, height: (iconSize + 12) * 2 }}
-              initial={false} 
-              animate={{ 
-                scale: isBadgeHovered && !isReducedMotion ? 1.0 : 1,
-              }}
+              style={{ width: (iconSize + 12) * 2, height: (iconSize + 12) * 2 }} // Circular part
+              whileHover={!isReducedMotion ? { 
+                scale: 1.0, // Keep inner circle scale, outer div handles pop via springScale
+              } : {}}
               transition={{ type: 'spring', stiffness: 300, damping: 15 }}
             >
               <svg className="absolute inset-0 w-full h-full overflow-visible" viewBox={`0 0 ${(progressRingRadius*2+6)} ${(progressRingRadius*2+6)}`}>
@@ -152,31 +167,31 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({
                         <stop offset="100%" stopColor="hsl(var(--gradient-end))" />
                     </linearGradient>
                 </defs>
-                {/* Removed the background ring based on user request */}
                 <motion.circle // Progress ring
                   cx={progressRingRadius+3} cy={progressRingRadius+3}
                   r={progressRingRadius}
                   fill="transparent"
                   stroke={`url(#skillBadgeGradient-${skill.id})`}
-                  strokeWidth="3" // Keep stroke width consistent
+                  strokeWidth="3"
                   strokeLinecap="round"
                   transform={`rotate(-90 ${progressRingRadius+3} ${progressRingRadius+3})`}
                   initial={{ strokeDashoffset: progressRingCircumference }}
                   animate={isIntersecting || isReducedMotion ? { 
                     strokeDashoffset: progressRingCircumference * (1 - skill.proficiency / 100),
+                    // Ring pulse on hover, managed by whileHover on parent or direct animation
                     r: isBadgeHovered && !isReducedMotion ? progressRingRadius * 1.1 : progressRingRadius, 
                   } : { strokeDashoffset: progressRingCircumference }}
                   transition={isReducedMotion ? {duration: 0} : {
                     strokeDashoffset: { duration: 1, ease: "easeOut", delay: index * 0.08 + (isIntersecting ? 0.8 : 0) }, 
-                    r: { type: 'spring', stiffness: 400, damping: 10, duration: 0.4, repeat: isBadgeHovered ? Infinity : 0, repeatType: "reverse" }
+                    r: { type: 'spring', stiffness: 400, damping: 10, duration: 0.4, repeat: isBadgeHovered && !isReducedMotion ? Infinity : 0, repeatType: "reverse" }
                   }}
                   strokeDasharray={progressRingCircumference}
                 />
               </svg>
               <motion.div
                 className="z-10"
-                animate={{ y: isBadgeHovered && !isReducedMotion ? [0, -5, 0] : 0 }} 
-                transition={{ duration: 0.3, ease: "easeInOut", repeat: isBadgeHovered ? Infinity : 0, repeatDelay: 0.2, delay:0.05}}
+                animate={!isReducedMotion ? { y: isBadgeHovered ? [0, -5, 0] : 0 } : {}}
+                transition={{ duration: 0.3, ease: "easeInOut", repeat: isBadgeHovered && !isReducedMotion ? Infinity : 0, repeatDelay: 0.2, delay:0.05}}
               >
                 <Icon size={iconSize} className="text-primary group-hover:text-[hsl(var(--gradient-end))] transition-colors duration-200" />
               </motion.div>
@@ -186,12 +201,8 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({
             side="top" 
             className="custom-tooltip-content tooltip-arrow-top w-52 bg-popover/80 backdrop-blur-md text-popover-foreground p-3 rounded-lg shadow-xl border border-border/30"
             sideOffset={12}
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 5 }}
-            // @ts-ignore TODO: fix type framer-motion with asChild of shadcn
-            transition={{ duration: 0.15, delay:0.2 }} 
-          >
+            // Framer Motion props for TooltipContent need to be on a motion component if used directly
+          > 
             <p className="font-bold gradient-text text-sm mb-1.5">{skill.name}</p>
             <div className="my-1">
               <div className="flex justify-between text-xs text-muted-foreground mb-0.5">
@@ -247,27 +258,42 @@ const SkillGalaxy: React.FC<SkillGalaxyProps> = ({ skills, categories, onSkillHo
     return () => window.removeEventListener('resize', updateDimensionsAndDevice);
   }, []);
   
-  const centerOffset = { x: 0, y: 0 }; 
-
   const currentIconSize = isDesktop ? ICON_SIZE_DESKTOP : ICON_SIZE_MOBILE;
-  const badgeBoxWidth = (currentIconSize + 12) * 2 + 16; // Outer div width from SkillBadge
-  const desiredBadgeSpacing = isDesktop ? 20 : 15; // More space on desktop
-  const badgeVisualRadius = currentIconSize + 4; // Radius of the circular progress part
+  // Width of the entire SkillBadge component (circular part + text padding)
+  const badgeBoxWidth = (currentIconSize + 12) * 2 + 16; 
+  const desiredBadgeSpacing = isDesktop ? 30 : 20; // Increased spacing slightly
 
-  const circumferenceNeeded = skills.length * (badgeBoxWidth / 2 + desiredBadgeSpacing); // Use half box width for tighter packing if needed, or full
+  // Calculate circumference needed based on full badge width + spacing
+  const circumferenceNeeded = skills.length * (badgeBoxWidth + desiredBadgeSpacing);
   
   let calculatedBadgeOrbitRadius = circumferenceNeeded / (2 * Math.PI);
-  calculatedBadgeOrbitRadius = Math.max(calculatedBadgeOrbitRadius, 150); // Min radius to avoid extreme crowding
-
-  const minAestheticOrbitRadius = Math.min(galaxyDimensions.width / 2.2, galaxyDimensions.height / 2.2, isDesktop ? 250 : 200); 
-  const finalBadgeOrbitRadius = Math.max(calculatedBadgeOrbitRadius, minAestheticOrbitRadius);
-
-  const marginBetweenRadarAndBadgeVisuals = Math.min(galaxyDimensions.width * 0.08, 30); // Increased margin
-  const maxRadarOuterRadius = Math.max(0, finalBadgeOrbitRadius - badgeVisualRadius - marginBetweenRadarAndBadgeVisuals);
   
-  let targetRadarSize = Math.max(galaxyDimensions.width * 0.25, 150); // Radar aims for 25% of galaxy, min 150px
-  let finalRadarContainerSize = Math.min(targetRadarSize, maxRadarOuterRadius * 2); // Ensure radar fits inside badges
-  finalRadarContainerSize = Math.max(finalRadarContainerSize, 120); // Min practical radar size
+  // Ensure minimum radius for aesthetics and to prevent extreme crowding if few skills
+  calculatedBadgeOrbitRadius = Math.max(calculatedBadgeOrbitRadius, isDesktop ? 180 : 150);
+
+  // Aesthetic minimum radius, also constrained by half the galaxy size minus badge radius to keep badges visually within the galaxy area
+  const maxGalaxyContentRadius = (Math.min(galaxyDimensions.width, galaxyDimensions.height) / 2) - (badgeBoxWidth / 2) - 10; // 10px padding from edge
+  const aestheticMinOrbitRadius = Math.min(maxGalaxyContentRadius, isDesktop ? 280 : 220); // Increased max aesthetic size
+  
+  // Final orbit radius is the larger of what's needed for spacing vs. aesthetic minimum, but capped by container size
+  let finalBadgeOrbitRadius = Math.max(calculatedBadgeOrbitRadius, aestheticMinOrbitRadius);
+  finalBadgeOrbitRadius = Math.min(finalBadgeOrbitRadius, maxGalaxyContentRadius > 0 ? maxGalaxyContentRadius : aestheticMinOrbitRadius); // Ensure it fits
+
+
+  const radarChartVisualRadiusPercentage = 0.65; // Radar chart outerRadius is 65% of its container
+  // Margin between the radar chart's visual edge and the inner edge of skill badges
+  const marginBetweenRadarAndBadges = Math.max(20, Math.min(galaxyDimensions.width * 0.05, 40)); 
+  
+  // Max size for radar container so badges don't overlap it: orbit radius - badge inner radius - margin
+  const maxRadarContainerSizeBasedOnOrbit = 2 * (finalBadgeOrbitRadius - (currentIconSize + 4) /*progressRingRadius*/ - marginBetweenRadarAndBadges);
+
+  // Target size for radar, e.g., 30% of galaxy, min 150px
+  let targetRadarSize = Math.max(Math.min(galaxyDimensions.width, galaxyDimensions.height) * 0.3, 150);
+  
+  // Final radar container size is the smaller of its target or what fits inside the badge orbit
+  let finalRadarContainerSize = Math.min(targetRadarSize, maxRadarContainerSizeBasedOnOrbit > 0 ? maxRadarContainerSizeBasedOnOrbit : targetRadarSize);
+  finalRadarContainerSize = Math.max(finalRadarContainerSize, 120); // Absolute minimum practical radar size
+
 
   const radarChartData = useMemo(() => {
     return categories.map(category => {
@@ -286,25 +312,22 @@ const SkillGalaxy: React.FC<SkillGalaxyProps> = ({ skills, categories, onSkillHo
   const CustomAngleTick = useCallback(({ x, y, payload }: any) => {
     const isRadarHovered = payload.value === hoveredCategory;    
     let textAnchor = "middle";
-    const angle = payload.angle; // Angle in degrees from Recharts
-    const labelRadiusOffset = 10; // How far out the label is from axis end
+    const angle = payload.angle; 
+    const labelRadiusOffset = Math.max(10, finalRadarContainerSize * 0.05); 
 
-    // Calculate position with offset
     const radianAngle = (angle * Math.PI) / 180;
     const labelX = x + labelRadiusOffset * Math.cos(radianAngle);
     const labelY = y + labelRadiusOffset * Math.sin(radianAngle);
 
-
-    if (angle > 10 && angle < 170) { // Bottom half
-        // textAnchor = y > (finalRadarContainerSize / 2) ? "middle" : "middle"; // Could adjust based on y too
-    } else if (angle > 190 && angle < 350) { // Top half
-        // textAnchor = y < (finalRadarContainerSize / 2) ? "middle" : "middle";
-    } else if (angle <= 10 || angle >= 350) { // Right side
+    if (angle > 10 && angle < 170) { 
+       // textAnchor = "middle";
+    } else if (angle > 190 && angle < 350) { 
+       // textAnchor = "middle";
+    } else if (angle <= 10 || angle >= 350) { 
         textAnchor = "start";
-    } else { // Left side
+    } else { 
         textAnchor = "end";
     }
-
 
     return (
       <g transform={`translate(${labelX},${labelY})`}>
@@ -333,7 +356,7 @@ const SkillGalaxy: React.FC<SkillGalaxyProps> = ({ skills, categories, onSkillHo
         animate={{ opacity: 1, scale: 1, transition: { delay: isReducedMotion ? 0 : 0.3, duration: 0.8, ease: "circOut" } }}
       >
         <ResponsiveContainer width="100%" height="100%">
-          <RadarChart cx="50%" cy="50%" outerRadius="65%" data={radarChartData}> 
+          <RadarChart cx="50%" cy="50%" outerRadius={`${radarChartVisualRadiusPercentage*100}%`} data={radarChartData}> 
             <PolarGrid stroke={theme === 'dark' ? "hsl(var(--border)/0.3)" : "hsl(var(--muted)/0.5)"} />
             <PolarAngleAxis
               dataKey="subject"
@@ -384,9 +407,10 @@ const SkillGalaxy: React.FC<SkillGalaxyProps> = ({ skills, categories, onSkillHo
           skill={skill}
           index={index}
           totalSkills={skills.length}
-          orbitRadius={finalBadgeOrbitRadius}
-          centerOffset={centerOffset} 
+          orbitRadius={finalBadgeOrbitRadius} // Use the final calculated and constrained radius
           iconSize={currentIconSize}
+          initialX={0} // Start from center for orbit animation
+          initialY={0}
           onHover={onSkillHover}
           onCategoryHover={onCategoryHover}
           isReducedMotion={isReducedMotion}
@@ -403,26 +427,27 @@ export function SkillsSection() {
   const [hoveredCategory, setHoveredCategory] = useState<SkillCategoryName | null>(null);
   const [isClient, setIsClient] = useState(false);
   const framerReducedMotion = useReducedMotion();
-  const [isReducedMotionActive, setIsReducedMotionActive] = useState(true);
+  const [isReducedMotionActive, setIsReducedMotionActive] = useState(true); // Default to true for SSR
   const [isMobileView, setIsMobileView] = useState(false);
   const { theme } = useTheme();
 
   useEffect(() => {
     setIsClient(true);
+    // Ensure isReducedMotionActive is correctly set once framerReducedMotion is available
     setIsReducedMotionActive(framerReducedMotion === true); 
 
     const checkMobile = () => setIsMobileView(window.innerWidth < 768);
-    checkMobile();
+    checkMobile(); // Initial check
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
-  }, [framerReducedMotion]);
+  }, [framerReducedMotion]); // Re-run when framerReducedMotion value changes
 
   const sectionVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.2 } },
   };
 
-  if (!isClient) {
+  if (!isClient) { // Skeleton or basic loading state for SSR / pre-hydration
     return (
       <Section id="skills" title="My Tech Toolbox" className="py-16 md:py-24 min-h-[500px] md:min-h-[700px]">
         <div className="text-center text-muted-foreground">Loading skills...</div>
@@ -434,11 +459,12 @@ export function SkillsSection() {
     <Section id="skills" title="My Tech Toolbox" className="py-20 md:py-28 lg:py-32 overflow-hidden">
        <motion.div
         variants={sectionVariants}
-        initial={isReducedMotionActive ? "visible" : "hidden"}
+        initial={isReducedMotionActive ? "visible" : "hidden"} // Apply initial based on reduced motion
         whileInView="visible"
-        viewport={{ once: true, amount: 0.05 }}
+        viewport={{ once: true, amount: 0.05 }} // Trigger when 5% is visible
       >
       {isMobileView ? (
+        // Mobile View: Accordion
         <Accordion type="single" collapsible className="w-full space-y-4">
           {skillCategories.map((category) => (
             <AccordionItem key={category.name} value={category.name} className="bg-card/60 backdrop-blur-md border-border/30 shadow-lg rounded-lg">
@@ -509,8 +535,10 @@ export function SkillsSection() {
           ))}
         </Accordion>
       ) : (
+        // Desktop View: Skill Galaxy
         <div 
           className="relative w-full mx-auto"
+          // Ensure enough height for the galaxy to not feel cramped
           style={{ height: 'calc(min(80vh, 750px))' }} 
         >
              <SkillGalaxy
@@ -528,4 +556,3 @@ export function SkillsSection() {
     </Section>
   );
 }
-
