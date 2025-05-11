@@ -358,12 +358,12 @@ export const skillsData: Skill[] = [
 export const skillRelationships: { [key: string]: string[] } = {
   'nodejs': ['typescript', 'express', 'nestjs', 'api-design', 'graphql', 'docker', 'mongodb', 'postgresql'],
   'docker': ['kubernetes', 'aws', 'ci-cd', 'nodejs', 'python'],
-  'aws': ['docker', 'kubernetes', 'ci-cd', 'terraform', 'aws-eks', 'mongodb', 'postgresql', 'sagemaker'],
+  'aws': ['docker', 'kubernetes', 'ci-cd', 'terraform', 'aws-eks', 'mongodb', 'postgresql'], // Removed sagemaker as it's not in skillsData
   'ci-cd': ['docker', 'kubernetes', 'aws', 'github', 'terraform', 'linux'],
   'kubernetes': ['docker', 'aws', 'aws-eks', 'terraform', 'ci-cd'],
   'python': ['scikit-learn', 'tensorflow', 'pytorch', 'docker'],
   'typescript': ['nodejs', 'nestjs', 'react'],
-  'tensorflow': ['python', 'keras'], // Assuming Keras might be another skill or implied
+  'tensorflow': ['python'], // Removed Keras, not in skillsData
   'pytorch': ['python'],
   'scikit-learn': ['python'],
   'git': ['github', 'ci-cd'], // GitHub is a platform using Git

@@ -49,6 +49,7 @@ export function MilestoneCard({ milestone, isReducedMotion }: MilestoneCardProps
         >
           <Card 
             className="h-full bg-card/70 backdrop-blur-md border-border/30 shadow-lg flex flex-col transition-all duration-300 group-hover:shadow-xl group-focus-visible:ring-2 group-focus-visible:ring-primary"
+            // @ts-ignore TODO: fix type framer-motion with asChild of shadcn
             whileHover={!isReducedMotion ? { 
               scale: 1.03, 
               boxShadow: "0px 8px 25px hsla(var(--gradient-middle), 0.2), 0px 0px 15px hsla(var(--gradient-middle), 0.1)",

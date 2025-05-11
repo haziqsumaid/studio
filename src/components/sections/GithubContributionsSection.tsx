@@ -149,6 +149,7 @@ export function GithubContributionsSection() {
                 variants={loadingTextVariants}
                 initial="initial"
                 animate="animate"
+                // @ts-ignore TODO: fix type framer-motion with asChild of shadcn
                 transition={loadingTextVariants.transition}
               >
                 <CardDescription className="text-muted-foreground text-center pt-1">
@@ -165,6 +166,7 @@ export function GithubContributionsSection() {
                     variants={loadingTextVariants}
                     initial="initial"
                     animate="animate"
+                    // @ts-ignore TODO: fix type framer-motion with asChild of shadcn
                     transition={loadingTextVariants.transition}
                   >
                     <p className="text-center text-muted-foreground">Loading contributions graph...</p>

@@ -90,6 +90,7 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({ skill, index, totalSkills, orbi
     return () => {
       if (currentRef) observer.unobserve(currentRef);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isIntersecting, isReducedMotion, finalX, finalY, centerOffset.x, centerOffset.y, springX, springY, springScale, springOpacity, controls, index]);
 
 

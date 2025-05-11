@@ -171,7 +171,7 @@ export function HeroSection() {
             <Lottie animationData={keyboardAnimation} loop={false} />
           </motion.div>
         )} */}
-         {!isClient && !reducedMotion && ( // Fallback if Lottie isn't used or for SSR
+         {isClient && !reducedMotion && ( // Fallback if Lottie isn't used or for SSR
           <motion.div
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
