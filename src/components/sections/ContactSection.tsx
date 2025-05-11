@@ -18,7 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Section } from '@/components/Section';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Github, Linkedin, Twitter, Send, Mail, Phone, MapPin } from 'lucide-react';
+import { Github, Linkedin, Twitter, Send, Mail, Phone, MapPin, Users, MessageSquarePlus, Lightbulb, RefreshCcw } from 'lucide-react';
 import Link from "next/link";
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from 'react';
@@ -59,6 +59,14 @@ const contactInfoItems = [
   { icon: <MapPin size={20} className="text-primary" />, text: "Rawalpindi, Pakistan", label: "Location" },
 ];
 
+const aiSuggestionPrompts = [
+    "Suggest a friendly opening for a project inquiry.",
+    "Rephrase this for a more professional tone: 'Your project sounds cool, let's chat.'",
+    "Shorten this message while keeping the core idea: 'I'm very interested in collaborating on your upcoming backend initiative and believe my skills in Node.js and microservices would be a great asset. I'd love to learn more about the specific challenges and how I can contribute to its success.'",
+    "Make this sound more enthusiastic: 'I saw your portfolio, it's good.'",
+];
+
+
 export function ContactSection() {
   const { toast } = useToast();
   const form = useForm<ContactFormValues>({
@@ -72,6 +80,10 @@ export function ContactSection() {
 
   const framerReducedMotion = useReducedMotion();
   const [isReducedMotionActive, setIsReducedMotionActive] = useState(false);
+  const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
+  const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false);
+  const [currentMessage, setCurrentMessage] = useState("");
 
   useEffect(() => {
     setIsReducedMotionActive(framerReducedMotion ?? false);
@@ -79,8 +91,56 @@ export function ContactSection() {
 
   const socialIconResolvedVariants = isReducedMotionActive ? {} : iconHoverVariants;
 
+  // async function getAiSuggestions(messageContent: string) {
+  //   if (!messageContent.trim()) {
+  //     setAiSuggestions(aiSuggestionPrompts.map(prompt => `Click to generate: "${prompt}"`));
+  //     return;
+  //   }
+  //   setIsGeneratingSuggestions(true);
+  //   // In a real app, you'd call your GenAI flow here.
+  //   // For this example, we'll simulate a delay and provide placeholder suggestions.
+  //   await new Promise(resolve => setTimeout(resolve, 1500)); 
+    
+  //   const generated = [
+  //       `Reworded: "${messageContent.substring(0,30)}..." (Option 1)`,
+  //       `Professional: "${messageContent.substring(0,30)}..." (Option 2)`,
+  //       `Concise: "${messageContent.substring(0,20)}..." (Option 3)`,
+  //   ];
+  //   setAiSuggestions(generated);
+  //   setIsGeneratingSuggestions(false);
+  // }
+
+  const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newMessage = e.target.value;
+    form.setValue("message", newMessage);
+    setCurrentMessage(newMessage);
+    // if (isAiPanelOpen) {
+    //   getAiSuggestions(newMessage);
+    // }
+  };
+
+  const toggleAiPanel = () => {
+    const newPanelState = !isAiPanelOpen;
+    setIsAiPanelOpen(newPanelState);
+    // if (newPanelState) {
+    //   getAiSuggestions(currentMessage);
+    // }
+  };
+  
+  const applySuggestion = (suggestion: string) => {
+    // Placeholder: actual application logic would be more sophisticated
+    const actualSuggestionText = suggestion.startsWith("Click to generate:") 
+      ? suggestion.substring("Click to generate: ".length).replace(/"/g, "") // Example, actually generate if it's a prompt
+      : suggestion.substring(suggestion.indexOf('"') + 1, suggestion.lastIndexOf('"'));
+
+    form.setValue("message", actualSuggestionText);
+    setCurrentMessage(actualSuggestionText);
+    setIsAiPanelOpen(false); // Close panel after applying
+  };
+
+
   async function onSubmit(data: ContactFormValues) {
-    form.control.disabled = true; // Visually disable form during submission
+    form.control.disabled = true; 
     try {
       const response = await fetch('/api/contact', {
         method: 'POST',
@@ -99,8 +159,12 @@ export function ContactSection() {
       toast({
         title: "Message Sent!",
         description: "Thanks for reaching out. I'll get back to you soon.",
+        variant: "default",
+        className: "bg-green-500/20 border-green-500 text-foreground"
       });
       form.reset();
+      setCurrentMessage("");
+      setIsAiPanelOpen(false);
     } catch (error) {
       toast({
         title: "Uh oh! Something went wrong.",
@@ -108,7 +172,7 @@ export function ContactSection() {
         variant: "destructive",
       });
     } finally {
-       form.control.disabled = false; // Re-enable form
+       form.control.disabled = false; 
     }
   }
 
@@ -123,87 +187,150 @@ export function ContactSection() {
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
         >
-          <Card className="bg-card/60 backdrop-blur-md shadow-xl border-border/20 transform transition-all duration-300 hover:shadow-2xl">
-            <CardHeader>
-              <CardTitle className="text-2xl md:text-3xl gradient-text flex items-center">
-                <Send size={26} className="mr-3 transform -rotate-12"/> Send a Message
-              </CardTitle>
-              <CardDescription className="text-muted-foreground pt-1">
-                Have a project in mind or just want to say hi? Fill out the form below.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-foreground/90">Full Name</FormLabel>
-                        <FormControl>
-                          <motion.div variants={inputFocusVariants} initial="rest" whileFocus="focus" transition={{ duration: 0.2}}>
-                            <Input placeholder="Your Name" {...field} className="bg-input/70 backdrop-blur-sm border-border/50 focus:bg-input" disabled={form.formState.isSubmitting} />
-                          </motion.div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-foreground/90">Email Address</FormLabel>
-                        <FormControl>
-                           <motion.div variants={inputFocusVariants} initial="rest" whileFocus="focus" transition={{ duration: 0.2}}>
-                            <Input type="email" placeholder="your.email@example.com" {...field} className="bg-input/70 backdrop-blur-sm border-border/50 focus:bg-input" disabled={form.formState.isSubmitting}/>
-                           </motion.div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="message"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-foreground/90">Your Message</FormLabel>
-                        <FormControl>
-                          <motion.div variants={inputFocusVariants} initial="rest" whileFocus="focus" transition={{ duration: 0.2}}>
-                            <Textarea placeholder="Let's discuss your project or ideas..." rows={5} {...field} className="bg-input/70 backdrop-blur-sm border-border/50 focus:bg-input" disabled={form.formState.isSubmitting}/>
-                          </motion.div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button 
-                    type="submit" 
-                    className="w-full gradient-button text-lg py-3 shadow-lg hover:shadow-xl focus:ring-2 focus:ring-ring focus:ring-offset-2" 
-                    disabled={form.formState.isSubmitting}
-                    // @ts-ignore Framer motion props not fully compatible with asChild button
-                    whileTap={!isReducedMotionActive ? { scale: 0.97 } : {}}
-                    transition={!isReducedMotionActive ? { type: "spring", stiffness: 400, damping: 17 } : {}}
-                    as={motion.button}
-                  >
-                    <AnimatePresence mode="wait">
-                      {form.formState.isSubmitting ? (
-                        <motion.span key="sending" initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }}>
-                          Sending...
-                        </motion.span>
-                      ) : (
-                        <motion.span key="send" initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }} className="flex items-center">
-                          <Send size={18} className="mr-2.5"/>Send Message
-                        </motion.span>
+          <Card className="bg-card/60 backdrop-blur-md shadow-xl border-border/20 transform transition-all duration-300 hover:shadow-2xl relative overflow-hidden">
+             <motion.div 
+              className="absolute inset-0 opacity-20"
+              style={{
+                backgroundImage: 'radial-gradient(circle at 20% 20%, hsl(var(--primary)/0.5) 0%, transparent 30%), radial-gradient(circle at 80% 70%, hsl(var(--accent)/0.4) 0%, transparent 30%)',
+                filter: 'blur(60px)',
+                zIndex:0
+              }}
+              animate={{
+                x: ["-5%", "5%", "-5%"],
+                y: ["2%", "-2%", "2%"],
+                scale: [1, 1.05, 1],
+                opacity: [0.15, 0.3, 0.15]
+              }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            />
+            <div className="relative z-10"> {/* Content wrapper */}
+              <CardHeader>
+                <CardTitle className="text-2xl md:text-3xl gradient-text flex items-center">
+                  <Send size={26} className="mr-3 transform -rotate-12"/> Send a Message
+                </CardTitle>
+                <CardDescription className="text-muted-foreground pt-1">
+                  Have a project in mind or just want to say hi? Fill out the form below.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-foreground/90">Full Name</FormLabel>
+                          <FormControl>
+                            <motion.div variants={inputFocusVariants} initial="rest" whileFocus="focus" transition={{ duration: 0.2}}>
+                              <Input placeholder="Your Name" {...field} className="bg-input/70 backdrop-blur-sm border-border/50 focus:bg-input" disabled={form.formState.isSubmitting} />
+                            </motion.div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-foreground/90">Email Address</FormLabel>
+                          <FormControl>
+                            <motion.div variants={inputFocusVariants} initial="rest" whileFocus="focus" transition={{ duration: 0.2}}>
+                              <Input type="email" placeholder="your.email@example.com" {...field} className="bg-input/70 backdrop-blur-sm border-border/50 focus:bg-input" disabled={form.formState.isSubmitting}/>
+                            </motion.div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="message"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="flex justify-between items-center">
+                            <FormLabel className="text-foreground/90">Your Message</FormLabel>
+                            <Button type="button" variant="ghost" size="sm" onClick={toggleAiPanel} className="text-xs text-primary hover:text-primary/80 px-2 py-1" aria-expanded={isAiPanelOpen}>
+                              <Lightbulb size={14} className="mr-1.5" /> AI Suggestions
+                            </Button>
+                          </div>
+                          <FormControl>
+                            <motion.div variants={inputFocusVariants} initial="rest" whileFocus="focus" transition={{ duration: 0.2}}>
+                              <Textarea 
+                                placeholder="Let's discuss your project or ideas..." 
+                                rows={5} 
+                                {...field} 
+                                onChange={handleMessageChange}
+                                className="bg-input/70 backdrop-blur-sm border-border/50 focus:bg-input" 
+                                disabled={form.formState.isSubmitting}
+                              />
+                            </motion.div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <AnimatePresence>
+                    {isAiPanelOpen && (
+                        <motion.div 
+                            initial={{ opacity: 0, height: 0, y: -10 }}
+                            animate={{ opacity: 1, height: 'auto', y: 0 }}
+                            exit={{ opacity: 0, height: 0, y: -10 }}
+                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                            className="bg-muted/30 p-3 rounded-md border border-border/30"
+                        >
+                            <div className="flex justify-between items-center mb-2">
+                                <h4 className="text-sm font-semibold text-foreground">AI Rewording Suggestions</h4>
+                                <Button type="button" variant="ghost" size="icon" onClick={() => { /* getAiSuggestions(currentMessage) */ }} className="h-6 w-6" disabled={isGeneratingSuggestions}>
+                                    <RefreshCcw size={14} className={cn(isGeneratingSuggestions && "animate-spin")}/>
+                                </Button>
+                            </div>
+                            {isGeneratingSuggestions ? (
+                                <p className="text-xs text-muted-foreground text-center py-2">Generating ideas...</p>
+                            ) : (
+                                <ul className="space-y-1.5 text-xs">
+                                    {aiSuggestions.length > 0 ? aiSuggestions.map((s, i) => (
+                                        <li key={i}>
+                                            <button type="button" onClick={() => applySuggestion(s)} className="w-full text-left p-1.5 rounded hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors">
+                                                {s}
+                                            </button>
+                                        </li>
+                                    )) : <p className="text-xs text-muted-foreground text-center py-1">Type a message or click refresh for suggestions.</p>}
+                                </ul>
+                            )}
+                        </motion.div>
+                    )}
                     </AnimatePresence>
-                  </Button>
-                </form>
-              </Form>
-            </CardContent>
+
+
+                    <Button 
+                      type="submit" 
+                      className="w-full gradient-button text-lg py-3 shadow-lg hover:shadow-xl focus:ring-2 focus:ring-ring focus:ring-offset-2" 
+                      disabled={form.formState.isSubmitting}
+                      // @ts-ignore 
+                      whileTap={!isReducedMotionActive ? { scale: 0.97 } : {}}
+                      transition={!isReducedMotionActive ? { type: "spring", stiffness: 400, damping: 17 } : {}}
+                      as={motion.button}
+                    >
+                      <AnimatePresence mode="wait">
+                        {form.formState.isSubmitting ? (
+                          <motion.span key="sending" initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }} className="flex items-center">
+                            <motion.div className="mr-2.5" animate={{rotate:360}} transition={{duration:1, repeat:Infinity, ease:"linear"}}><Send size={18}/></motion.div>
+                            Sending...
+                          </motion.span>
+                        ) : (
+                          <motion.span key="send" initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }} className="flex items-center">
+                            <Send size={18} className="mr-2.5"/>Send Message
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </Button>
+                  </form>
+                </Form>
+              </CardContent>
+            </div>
           </Card>
         </motion.div>
 
@@ -273,3 +400,4 @@ export function ContactSection() {
     </Section>
   );
 }
+
