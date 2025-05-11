@@ -55,7 +55,7 @@ const SkillBadge: React.FC<SkillBadgeProps> = ({
     const currentBadgeRef = badgeRef.current;
     let observer: IntersectionObserver | null = null;
 
-    if (currentBadgeRef) { // Ensure ref is available
+    if (currentBadgeRef) { 
       if (isReducedMotionActive) {
         springX.set(finalX);
         springY.set(finalY);
@@ -329,9 +329,9 @@ const SkillGalaxy: React.FC<SkillGalaxyProps> = ({ skills, categories, onSkillHo
   const currentIconSize = isDesktop ? ICON_SIZE_DESKTOP : ICON_SIZE_MOBILE;
   const badgeVisualDiameter = (currentIconSize + 12 ) * 2 * 1.15; 
   
-  const radarChartContainerSize = Math.max(180, Math.min(galaxyDimensions.width * 0.3, isDesktop ? 220 : 180)); 
+  const radarChartContainerSize = Math.max(220, Math.min(galaxyDimensions.width * 0.35, isDesktop ? 280 : 220));
   
-  const radarVisualRadius = radarChartContainerSize * 0.5 * 0.9; // Radar labels extend chart radius
+  const radarVisualRadius = radarChartContainerSize * 0.5 * 0.9; 
   
   const marginBetweenRadarAndBadges = Math.max(15, Math.min(galaxyDimensions.width * 0.04, isDesktop ? 25 : 15)); 
   
@@ -366,7 +366,7 @@ const SkillGalaxy: React.FC<SkillGalaxyProps> = ({ skills, categories, onSkillHo
     const isRadarHovered = payload.value === hoveredCategory;    
     let textAnchor = "middle";
     const angle = payload.angle; 
-    const labelRadiusOffset = Math.max(12, radarChartContainerSize * 0.085); // Increased offset
+    const labelRadiusOffset = Math.max(12, radarChartContainerSize * 0.085); 
 
     const radianAngle = (angle * Math.PI) / 180;
     const labelX = x + labelRadiusOffset * Math.cos(radianAngle);
@@ -395,7 +395,7 @@ const SkillGalaxy: React.FC<SkillGalaxyProps> = ({ skills, categories, onSkillHo
           textAnchor={textAnchor}
           fill={isRadarHovered ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))'}
           fontWeight={isRadarHovered ? 'bold' : 'normal'}
-          fontSize={Math.max(9, radarChartContainerSize * 0.055)} // Slightly larger font
+          fontSize={Math.max(9, radarChartContainerSize * 0.055)} 
           className="transition-all duration-200"
         >
           {payload.value}
@@ -628,5 +628,3 @@ export function SkillsSection() {
     </Section>
   );
 }
-
-      
