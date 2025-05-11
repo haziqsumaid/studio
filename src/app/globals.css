@@ -2,124 +2,114 @@
 @tailwind components;
 @tailwind utilities;
 
-/*
-The following 'body' rule was removed because 'var(--font-geist-sans)' is no longer defined
-due to the removal of the GeistSans font loader. The 'font-sans' Tailwind class applied
-to the <body> tag in layout.tsx now handles the font family definition.
-
-body {
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
-}
-*/
-
 @layer base {
   :root {
-    --background-rgb: 247, 250, 252; /* Light Grayish Blue */
-    --background: 210 40% 98%;
-    --foreground: 215 25% 27%; /* Dark Desaturated Blue/Gray */
-    --card: 0 0% 100%; /* White */
-    --card-foreground: 215 25% 27%;
-    --popover-rgb: 255, 255, 255; /* White */
+    /* Light Mode (default) */
+    --bg-rgb: 255, 255, 255;      /* pure white */
+    --fg-rgb: 28, 32, 36;         /* dark charcoal approx hsl(222 15% 10%) */
+    --muted-bg-rgb: 246, 248, 250; /* off-white panels approx hsl(210 20% 98%) */
+    --muted-fg-rgb: 108, 117, 125; /* mid-gray text approx hsl(215 10% 45%) */
+    --primary-rgb: 56, 239, 125;   /* #38EF7D */
+    --primary-dark-rgb: 40, 191, 100; /* darker green approx hsl(145 75% 48%) */
+    --accent-rgb: 79, 164, 229;    /* complementary blue approx hsl(200 70% 60%) */
+    --border-rgb: 229, 231, 235;   /* very light gray approx hsl(210 15% 90%) */
+    --card-rgb: 255, 255, 255;
+    --popover-rgb: 255, 255, 255;
+
+    --bg: 0 0% 100%;             
+    --fg: 222 15% 10%;           
+    --muted-bg: 210 20% 98%;     
+    --muted-fg: 215 10% 45%;     
+    --primary: 145 85% 58%;      
+    --primary-dark: 145 75% 48%; 
+    --accent: 200 70% 60%;       
+    --border: 210 15% 90%;       
+    --card: 0 0% 100%;
+    --card-foreground: 222 15% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 27%;
-
-    /* Updated Primary Colors for Light Theme - Black/Dark Gray Accent */
-    --primary-rgb: 33, 37, 41; /* Dark Slate Gray (approx. for hsl(220, 10%, 15%)) */
-    --primary: 220 10% 15%; /* Dark Slate Gray */
-    --primary-foreground: 0 0% 98%; /* Near White (for contrast on dark primary) */
-    
-    --secondary: 210 30% 94%; /* Lighter Grayish Blue */
-    --secondary-foreground: 215 20% 35%; 
-    --muted: 210 30% 90%; /* Light Gray */
-    --muted-foreground: 215 15% 50%; /* Medium Gray */
-
-    /* Updated Accent Colors for Light Theme - Subtle Grayish Blue */
-    --accent-rgb: 199, 201, 209; /* Light Grayish Blue (approx. for hsl(220, 10%, 80%)) */
-    --accent: 220 10% 80%; /* Light Grayish Blue */
-    --accent-foreground: 220 10% 20%; /* Dark Blue-Gray (for text on light accent) */
-    
+    --popover-foreground: 222 15% 10%;
+    --primary-foreground: 0 0% 100%; /* White text on primary green */
+    --secondary: 210 20% 94%; /* Light grayish blue for secondary elements */
+    --secondary-foreground: 222 15% 25%; /* Darker text for secondary */
+    --muted: 210 20% 96%; /* Slightly off-white for muted backgrounds */
+    --muted-foreground: 215 10% 45%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-    --border: 210 20% 88%; /* Light Gray Border */
-    --input: 210 20% 91%; /* Slightly darker light gray for input background */
-    --ring: 220 10% 25%; /* Dark Slate Gray (for focus rings, slightly lighter than new primary) */
+    --input: 210 15% 92%; /* Light gray for input */
+    --ring: 145 85% 58%; /* Primary green for focus rings */
 
-    /* Updated Gradient for Light Theme - Monochromatic Dark Gray */
-    --gradient-start: 220 10% 25%;   /* Dark Gray (lighter) */
-    --gradient-middle: 220 10% 15%;  /* Dark Gray (primary) */
-    --gradient-end: 220 10% 10%;     /* Dark Gray (darker) */
-    
-    /* Updated Green levels for GitHub chart - Light Theme (now shades of gray-blue) */
-    --chart-git-0: hsl(var(--muted)); /* Explicitly use muted for 0 contributions */
-    --chart-git-1: 220 10% 90%;   /* very light gray-blue */
-    --chart-git-2: 220 10% 75%;   /* light gray-blue */
-    --chart-git-3: 220 10% 60%;   /* medium gray-blue */
-    --chart-git-4: 220 10% 45%;   /* dark gray-blue */
+    --gradient-start: 175 80% 33%; /* #11998E */
+    --gradient-middle: 145 85% 58%; /* #38EF7D */
+    --gradient-end: 85 56% 51%;   /* #96C93D */
 
+    /* Chart specific colors for light theme */
+    --chart-git-0: hsl(var(--muted-bg)); /* very light gray for 0 contributions */
+    --chart-git-1: 145 85% 80%;   /* lightest green */
+    --chart-git-2: 145 85% 65%;   
+    --chart-git-3: 145 85% 50%;  
+    --chart-git-4: 145 85% 40%; /* darkest green for light theme */
 
-    /* General chart colors - Light Theme */
-    --chart-1: 220 10% 15%; /* New Primary: Dark Slate Gray */
-    --chart-2: 200 80% 60%; /* Sky Blue (kept for diversity) */
-    --chart-3: 30 90% 65%;  /* Orange (kept for diversity) */
-    --chart-4: 260 70% 70%; /* Lavender (kept for diversity) */
-    --chart-5: 340 85% 70%; /* Pink (kept for diversity) */
+    --chart-1: hsl(var(--primary));
+    --chart-2: hsl(var(--accent));
+    --chart-3: 30 90% 65%;  /* Orange */
+    --chart-4: 260 70% 70%; /* Lavender */
+    --chart-5: 340 85% 70%; /* Pink */
 
     --radius: 0.5rem;
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   }
 
   .dark {
-    --background-rgb: 10, 15, 13; /* #0A0F0D in RGB */
-    --background: 160 17% 6%; /* Dark mode base #0A0F0D */
-    --foreground: 0 0% 95%; /* Light gray for text #F2F2F2 */
-    --card: 160 17% 10%; /* Slightly lighter than background */
+    --bg-rgb: 10, 15, 13;        /* #0A0F0D */
+    --fg-rgb: 242, 242, 242;     /* near-white approx hsl(0 0% 95%) */
+    --muted-bg-rgb: 20, 26, 23;  /* dark panels approx hsl(160 10% 15%) */
+    --muted-fg-rgb: 153, 153, 153;/* mid-gray text approx hsl(0 0% 60%) */
+    --primary-rgb: 56, 239, 125; /* #38EF7D */
+    --primary-dark-rgb: 40, 191, 100; /* darker green */
+    --accent-rgb: 105, 192, 240;  /* lighter blue approx hsl(200 70% 70%) */
+    --border-rgb: 64, 64, 64;    /* deep gray approx hsl(0 0% 25%) */
+    --card-rgb: 20, 26, 23; /* Same as muted-bg for dark theme cards */
+    --popover-rgb: 26, 33, 30; /* Slightly darker for popovers */
+
+    --bg: 160 17% 6%;            
+    --fg: 0 0% 95%;              
+    --muted-bg: 160 10% 15%;     
+    --muted-fg: 0 0% 60%;        
+    --primary: 145 85% 58%;      
+    --primary-dark: 145 75% 48%; 
+    --accent: 200 70% 70%;       
+    --border: 0 0% 25%;          
+    --card: 160 10% 15%;
     --card-foreground: 0 0% 95%;
-    --popover-rgb: 15, 18, 17; /* Roughly #0F1211 from 160 17% 8% for hsla usage */
-    --popover: 160 17% 8%; /* Darker for popovers */
+    --popover: 160 10% 12%; /* Slightly darker than card */
     --popover-foreground: 0 0% 95%;
-    --primary-rgb: 56, 239, 125; 
-    --primary: 145 85% 58%; /* Green gradient middle #38EF7D */
-    --primary-foreground: 160 17% 6%; /* Dark text for primary buttons */
-    --secondary: 160 10% 15%; /* Darker gray for secondary elements */
-    --secondary-foreground: 0 0% 95%;
-    --muted: 160 10% 20%; /* Muted backgrounds */
-    --muted-foreground: 0 0% 60%; /* Muted text #999999 */
-    --accent-rgb: 189, 189, 189; /* Gray #BDBDBD in RGB */
-    --accent: 0 0% 74%; /* Gray #BDBDBD */
-    --accent-foreground: 160 17% 6%; /* Dark text for accent elements */
+    --primary-foreground: 160 17% 8%; /* Dark text on primary green */
+    --secondary: 160 10% 20%; /* Darker gray for secondary elements */
+    --secondary-foreground: 0 0% 90%; /* Lighter text for dark secondary */
+    --muted: 160 10% 22%; 
+    --muted-foreground: 0 0% 60%;
+    --accent-foreground: 160 17% 8%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 25%; /* Darker gray for borders #404040 */
-    --input: 0 0% 20%; /* Slightly lighter for input fields */
-    --ring: 145 85% 58%; /* Green gradient middle for focus rings */
+    --input: 0 0% 18%; /* Darker gray for input */
+    --ring: 145 85% 58%; 
 
     --gradient-start: 175 80% 33%; /* #11998E */
     --gradient-middle: 145 85% 58%; /* #38EF7D */
     --gradient-end: 85 56% 51%;   /* #96C93D */
     
-    /* Green levels for GitHub chart - Dark Theme */
-    --chart-git-0: hsl(var(--muted)); /* Explicitly use muted for 0 contributions */
-    --chart-git-1: 145 85% 20%; /* Darkest green, barely visible */
+    /* Chart specific colors for dark theme */
+    --chart-git-0: hsl(var(--muted-bg)); /* dark muted for 0 contributions */
+    --chart-git-1: 145 85% 20%;   /* darkest green */
     --chart-git-2: 145 85% 35%;   
     --chart-git-3: 145 85% 50%;  
-    --chart-git-4: 145 85% 65%; /* Brightest green */
+    --chart-git-4: 145 85% 65%; /* brightest green */
 
-    /* General chart colors - Dark Theme */
-    --chart-1: 145 85% 58%; /* Primary Green */
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.15);
-    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.2), 0 1px 2px -1px rgb(0 0 0 / 0.2);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.2), 0 2px 4px -2px rgb(0 0 0 / 0.2);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.25), 0 4px 6px -4px rgb(0 0 0 / 0.25);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.3), 0 8px 10px -6px rgb(0 0 0 / 0.3);
+    --chart-1: hsl(var(--primary));
+    --chart-2: 173 58% 45%; /* Dark Teal */
+    --chart-3: 210 30% 40%; /* Dark Blue-Gray */
+    --chart-4: 43 74% 55%;  /* Gold */
+    --chart-5: 27 87% 60%;  /* Muted Orange */
   }
 }
 
@@ -128,7 +118,9 @@ body {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-bg text-fg;
+    font-family: var(--font-inter), theme('fontFamily.sans');
+    line-height: 1.5;
     scroll-behavior: smooth;
   }
   html.dark {
@@ -136,6 +128,15 @@ body {
   }
   html:not(.dark) {
     color-scheme: light;
+  }
+
+  h1 { @apply text-4xl md:text-5xl lg:text-6xl font-extrabold; } /* Updated to match spec more closely, using lg for 4rem equivalent */
+  h2 { @apply text-3xl md:text-4xl lg:text-5xl font-bold; } /* H2: 2.5rem desktop */
+  h3 { @apply text-xl md:text-2xl lg:text-3xl font-semibold; } /* H3: 1.75rem desktop */
+  p { @apply text-base font-normal text-fg; }
+  code, pre {
+    font-family: var(--font-jetbrains-mono), theme('fontFamily.mono');
+    @apply text-sm leading-snug; /* 0.95rem approx */
   }
 }
 
@@ -146,10 +147,14 @@ body {
 .gradient-button {
   @apply bg-gradient-to-r from-[hsl(var(--gradient-start))] via-[hsl(var(--gradient-middle))] to-[hsl(var(--gradient-end))] text-primary-foreground hover:opacity-90 transition-opacity;
 }
+.gradient-button-inverted {
+   @apply bg-gradient-to-l from-[hsl(var(--gradient-start))] via-[hsl(var(--gradient-middle))] to-[hsl(var(--gradient-end))] text-primary-foreground hover:opacity-90 transition-opacity;
+}
+
 
 .gradient-button-outline {
     @apply border-2 border-transparent bg-clip-border text-transparent;
-    background-image: linear-gradient(hsl(var(--background)), hsl(var(--background))), linear-gradient(to right, hsl(var(--gradient-start)), hsl(var(--gradient-middle)), hsl(var(--gradient-end)));
+    background-image: linear-gradient(hsl(var(--bg)), hsl(var(--bg))), linear-gradient(to right, hsl(var(--gradient-start)), hsl(var(--gradient-middle)), hsl(var(--gradient-end)));
     background-origin: border-box;
     background-clip: content-box, border-box;
 }
@@ -157,14 +162,14 @@ body {
     @apply gradient-text;
 }
 .gradient-button-outline:hover {
-    background-image: linear-gradient(hsl(var(--background)), hsl(var(--background))), linear-gradient(to right, hsl(var(--gradient-end)), hsl(var(--gradient-middle)), hsl(var(--gradient-start)));
+    background-image: linear-gradient(hsl(var(--bg)), hsl(var(--bg))), linear-gradient(to right, hsl(var(--gradient-end)), hsl(var(--gradient-middle)), hsl(var(--gradient-start)));
 }
 
 .typing-cursor::after {
   content: '|';
-  animation: blink 0.7s step-end infinite; /* Adjusted speed */
-  margin-left: 0.125em; /* Adjust spacing as needed */
-  @apply text-[hsl(var(--primary))]; /* Cursor color matching primary/gradient */
+  animation: blink 1s step-end infinite;
+  margin-left: 0.125em; 
+  @apply text-[hsl(var(--primary))]; 
 }
 
 @keyframes blink {
@@ -172,7 +177,7 @@ body {
     color: transparent; 
   }
   50% { 
-    color: hsl(var(--primary)); /* Use primary color for cursor */
+    color: hsl(var(--primary)); 
   }
 }
 
@@ -185,7 +190,7 @@ body {
   @apply bg-transparent;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  @apply bg-primary/70 rounded-full; /* Increased opacity */
+  @apply bg-primary/70 rounded-full;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   @apply bg-primary;
@@ -205,63 +210,52 @@ body {
   scrollbar-width: none;  /* Firefox */
 }
 
-/* Added shadow-lg utility */
-.shadow-lg {
-  box-shadow: var(--shadow-lg);
-}
-.shadow-xl {
-  box-shadow: var(--shadow-xl);
-}
-
 /* Custom Tooltip Arrow Styling */
 .custom-tooltip-content {
   @apply bg-popover/80 backdrop-blur-md text-popover-foreground p-3 rounded-lg shadow-xl border border-border/30 relative;
 }
 
-/* Arrow for tooltips appearing above the trigger */
-.custom-tooltip-content.tooltip-arrow-top::before {
+.tooltip-arrow-top::before,
+.tooltip-arrow-bottom::before,
+.tooltip-arrow-left::before,
+.tooltip-arrow-right::before {
   content: "";
   position: absolute;
-  top: 100%; /* Arrow at the bottom of the tooltip, pointing down to the trigger */
-  left: 50%;
-  transform: translateX(-50%);
   border-width: 6px;
   border-style: solid;
-  border-color: hsl(var(--popover)) transparent transparent transparent; /* Arrow points down */
+  border-color: transparent; /* Default, overridden by specific direction */
+}
+
+/* Arrow for tooltips appearing above the trigger */
+.tooltip-arrow-bottom::before { /* Radix side=top means arrow is at bottom of tooltip */
+  top: 100%; 
+  left: 50%;
+  transform: translateX(-50%);
+  border-top-color: hsla(var(--popover-rgb), 0.8); /* Match backdrop-blur color */
 }
 
 /* Arrow for tooltips appearing below the trigger */
-.custom-tooltip-content.tooltip-arrow-bottom::before {
-  content: "";
-  position: absolute;
-  bottom: 100%; /* Arrow at the top of the tooltip, pointing up to the trigger */
+.tooltip-arrow-top::before { /* Radix side=bottom means arrow is at top of tooltip */
+  bottom: 100%;
   left: 50%;
   transform: translateX(-50%);
-  border-width: 6px;
-  border-style: solid;
-  border-color: transparent transparent hsl(var(--popover)) transparent; /* Arrow points up */
+  border-bottom-color: hsla(var(--popover-rgb), 0.8);
 }
 
 /* Arrow for tooltips appearing to the left of the trigger */
-.custom-tooltip-content.tooltip-arrow-left::before {
-  content: "";
-  position: absolute;
-  left: 100%; /* Arrow at the right of the tooltip, pointing left to the trigger */
+.tooltip-arrow-right::before { /* Radix side=left means arrow is at right of tooltip */
+  left: 100%; 
   top: 50%;
   transform: translateY(-50%);
-  border-width: 6px;
-  border-style: solid;
-  border-color: transparent transparent transparent hsl(var(--popover)); /* Arrow points left */
+  border-left-color: hsla(var(--popover-rgb), 0.8);
 }
 
 /* Arrow for tooltips appearing to the right of the trigger */
-.custom-tooltip-content.tooltip-arrow-right::before {
-  content: "";
-  position: absolute;
-  right: 100%; /* Arrow at the left of the tooltip, pointing right to the trigger */
+.tooltip-arrow-left::before { /* Radix side=right means arrow is at left of tooltip */
+  right: 100%; 
   top: 50%;
   transform: translateY(-50%);
-  border-width: 6px;
-  border-style: solid;
-  border-color: transparent hsl(var(--popover)) transparent transparent; /* Arrow points right */
+  border-right-color: hsla(var(--popover-rgb), 0.8);
 }
+
+    
