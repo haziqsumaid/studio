@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 import defaultTheme from 'tailwindcss/defaultTheme';
 
@@ -49,12 +50,18 @@ export default {
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',
   			chart: {
-  				'1': 'hsl(var(--chart-1))',
-  				'2': 'hsl(var(--chart-2))',
-  				'3': 'hsl(var(--chart-3))',
-  				'4': 'hsl(var(--chart-4))',
-  				'5': 'hsl(var(--chart-5))'
-  			},
+          // Light theme chart colors (shades of gray-blue for GitHub, diverse for general)
+          'git-0': 'hsl(var(--chart-git-0))',
+          'git-1': 'hsl(var(--chart-git-1))',
+          'git-2': 'hsl(var(--chart-git-2))',
+          'git-3': 'hsl(var(--chart-git-3))',
+          'git-4': 'hsl(var(--chart-git-4))',
+          '1': 'hsl(var(--chart-1))', // Primary color (Dark Slate Gray in light, Green in dark)
+          '2': 'hsl(var(--chart-2))', // Sky Blue / Dark Teal
+          '3': 'hsl(var(--chart-3))', // Orange / Dark Blue-Gray
+          '4': 'hsl(var(--chart-4))', // Lavender / Gold
+          '5': 'hsl(var(--chart-5))'  // Pink / Muted Orange
+        },
   			sidebar: {
   				DEFAULT: 'hsl(var(--sidebar-background))',
   				foreground: 'hsl(var(--sidebar-foreground))',
@@ -98,5 +105,6 @@ export default {
   plugins: [
     require("tailwindcss-animate"),
     require('tailwind-scrollbar')({ nocompatible: true }),
+    require('@tailwindcss/aspect-ratio'),
   ],
 } satisfies Config;
