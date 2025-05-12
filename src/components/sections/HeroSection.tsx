@@ -5,10 +5,9 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, Keyboard } from 'lucide-react';
 import { GradientText } from '@/components/GradientText';
-import { motion, useMotionValue, useTransform, useReducedMotion, AnimatePresence } from 'framer-motion';
+import { motion, useMotionValue, useTransform, useReducedMotion, AnimatePresence, useSpring } from 'framer-motion';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-// import { ParticleBackground } from '@/components/ParticleBackground'; // ParticleBackground removed
 import { ScrollPrompt } from '@/components/ScrollPrompt';
 
 const roles = [
@@ -30,41 +29,38 @@ export function HeroSection() {
 
   const heroRef = useRef<HTMLElement>(null);
 
-  const mouseX = useMotionValue(0); // Initialize to 0, will be updated
-  const mouseY = useMotionValue(0); // Initialize to 0, will be updated
+  const mouseX = useMotionValue(0); 
+  const mouseY = useMotionValue(0); 
 
 
   const framerReducedMotion = useReducedMotion();
-  const [isReducedMotionActive, setIsReducedMotionActive] = useState(true); // Default true for SSR
+  const [isReducedMotionActive, setIsReducedMotionActive] = useState(true); 
 
   useEffect(() => {
     setIsClient(true);
-    setIsReducedMotionActive(framerReducedMotion ?? false); // Set based on hook after mount
+    setIsReducedMotionActive(framerReducedMotion ?? false); 
 
     const currentHeroRef = heroRef.current;
     if (currentHeroRef) {
       const rect = currentHeroRef.getBoundingClientRect();
       setHeroActualDimensions({ width: rect.width, height: rect.height });
-      // Set initial motion values relative to the center of the element IF NEEDED
-      // For parallax triggered by mouse over element, this might be set to rect.width / 2, rect.height / 2
-      // But if parallax is based on viewport mouse, then 0,0 is fine or event.clientX/Y directly.
-      // For this implementation, we'll set them to center for the rotate effect on mouse move.
+      
       mouseX.set(rect.width / 2);
       mouseY.set(rect.height / 2);
 
 
       const handleMouseMove = (event: MouseEvent) => {
-        // No currentHeroRef check needed here as listener is removed on unmount
         const localRect = currentHeroRef.getBoundingClientRect(); 
         mouseX.set(event.clientX - localRect.left);
         mouseY.set(event.clientY - localRect.top);
       };
       currentHeroRef.addEventListener('mousemove', handleMouseMove);
       
-      // Reset on mouse leave to avoid sticky rotation
       const handleMouseLeave = () => {
-        mouseX.set(heroActualDimensions.width / 2);
-        mouseY.set(heroActualDimensions.height / 2);
+        if (heroActualDimensions.width > 0 && heroActualDimensions.height > 0) { // Ensure dimensions are set
+            mouseX.set(heroActualDimensions.width / 2);
+            mouseY.set(heroActualDimensions.height / 2);
+        }
       };
       currentHeroRef.addEventListener('mouseleave', handleMouseLeave);
 
@@ -73,20 +69,19 @@ export function HeroSection() {
         currentHeroRef.removeEventListener('mouseleave', handleMouseLeave);
       }
     }
-  }, [framerReducedMotion, mouseX, mouseY, heroActualDimensions.width, heroActualDimensions.height]); // Added heroActualDimensions to dependency array
+  }, [framerReducedMotion, mouseX, mouseY, heroActualDimensions.width, heroActualDimensions.height]);
 
 
-  const rotateXConfig = !isClient || isReducedMotionActive ? 0 : useTransform(mouseY, [0, heroActualDimensions.height || 600], [10, -10]);
-  const rotateYConfig = !isClient || isReducedMotionActive ? 0 : useTransform(mouseX, [0, heroActualDimensions.width || 800], [-10, 10]);
+  // Always call useTransform and useSpring
+  const rawRotateX = useTransform(mouseY, [0, heroActualDimensions.height || 600], [10, -10]);
+  const rawRotateY = useTransform(mouseX, [0, heroActualDimensions.width || 800], [-10, 10]);
+  const rawButtonRotateX = useTransform(mouseY, [0, heroActualDimensions.height || 600], [5, -5]);
+  const rawButtonRotateY = useTransform(mouseX, [0, heroActualDimensions.width || 800], [-5, 5]);
 
-  const buttonRotateXConfig = !isClient || isReducedMotionActive ? 0 : useTransform(mouseY, [0, heroActualDimensions.height || 600], [5, -5]);
-  const buttonRotateYConfig = !isClient || isReducedMotionActive ? 0 : useTransform(mouseX, [0, heroActualDimensions.width || 800], [-5, 5]);
-  
-  const rotateX = typeof rotateXConfig === 'number' ? rotateXConfig : useSpring(rotateXConfig, { stiffness: 300, damping: 30 });
-  const rotateY = typeof rotateYConfig === 'number' ? rotateYConfig : useSpring(rotateYConfig, { stiffness: 300, damping: 30 });
-  
-  const buttonRotateX = typeof buttonRotateXConfig === 'number' ? buttonRotateXConfig : useSpring(buttonRotateXConfig, { stiffness: 200, damping: 20 });
-  const buttonRotateY = typeof buttonRotateYConfig === 'number' ? buttonRotateYConfig : useSpring(buttonRotateYConfig, { stiffness: 200, damping: 20 });
+  const springRotateX = useSpring(rawRotateX, { stiffness: 300, damping: 30 });
+  const springRotateY = useSpring(rawRotateY, { stiffness: 300, damping: 30 });
+  const springButtonRotateX = useSpring(rawButtonRotateX, { stiffness: 200, damping: 20 });
+  const springButtonRotateY = useSpring(rawButtonRotateY, { stiffness: 200, damping: 20 });
 
 
   useEffect(() => {
@@ -139,12 +134,11 @@ export function HeroSection() {
 
   return (
     <section ref={heroRef} id="hero" className="min-h-screen flex items-center justify-center bg-transparent relative overflow-hidden" style={{ perspective: '1000px' }}>
-      {/* Global AnimatedBackground is now used in layout.tsx, so ParticleBackground removed from here */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10"> {/* Ensure content is above global background */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
         <motion.div
           style={{
-            rotateX: rotateX,
-            rotateY: rotateY,
+            rotateX: (!isClient || isReducedMotionActive) ? 0 : springRotateX,
+            rotateY: (!isClient || isReducedMotionActive) ? 0 : springRotateY,
             transformStyle: 'preserve-3d',
           }}
           className="mb-6"
@@ -202,8 +196,8 @@ export function HeroSection() {
           transition={{ duration: 0.5, delay: isReducedMotionActive ? 0.6 : 1 }}
           className="inline-block"
           style={{
-            rotateX: buttonRotateX,
-            rotateY: buttonRotateY,
+            rotateX: (!isClient || isReducedMotionActive) ? 0 : springButtonRotateX,
+            rotateY: (!isClient || isReducedMotionActive) ? 0 : springButtonRotateY,
             transformStyle: 'preserve-3d',
           }}
         >
@@ -226,3 +220,4 @@ export function HeroSection() {
     </section>
   );
 }
+
