@@ -63,11 +63,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn('antialiased bg-background text-foreground font-sans')}>
+      <body className={cn('antialiased text-foreground font-sans')}> {/* Removed bg-background from body */}
         <ThemeProvider>
           <MotionConfig reducedMotion="user">
             <AnimatedBackground /> {/* Add AnimatedBackground here */}
-            <div className="relative z-10 flex flex-col min-h-screen"> {/* Wrapper to keep content above background */}
+            <div className="relative z-10 flex flex-col min-h-screen bg-background"> {/* Added bg-background to content wrapper */}
               <Navbar />
               <main className="pt-16 flex-grow"> {/* Add padding-top and flex-grow */}
                 {children}
