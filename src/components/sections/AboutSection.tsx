@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useRef } from 'react'; // Added React import
@@ -5,7 +6,7 @@ import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion
 import { Section } from '@/components/Section';
 import { DynamicPhoto } from '@/components/sections/about/DynamicPhoto';
 import { JourneyTimeline, type Milestone } from '@/components/sections/about/JourneyTimeline';
-import { ScrollProgressBar } from './about/ScrollProgressBar'; // New import
+// import { ScrollProgressBar } from './about/ScrollProgressBar'; // Removed import
 import { Briefcase, GitMerge, Users, Database as DatabaseLucide, ShoppingBag } from 'lucide-react';
 
 const journeyMilestones: Milestone[] = [
@@ -77,9 +78,9 @@ const itemVariants = {
 };
 
 export function AboutSection() {
-  const sectionWrapperRef = useRef<HTMLDivElement>(null); // Ref for the entire About section wrapper
+  const sectionWrapperRef = useRef<HTMLDivElement>(null); 
   const { scrollYProgress } = useScroll({
-    target: sectionWrapperRef, // Use the wrapper ref for scroll progress tracking
+    target: sectionWrapperRef, 
     offset: ["start start", "end end"], 
   });
   const reducedMotion = useReducedMotion();
@@ -87,9 +88,9 @@ export function AboutSection() {
   const rotateX = useTransform(scrollYProgress, [0, 1], reducedMotion ? [0, 0] : [3, -3]);
 
   return (
-    <div ref={sectionWrapperRef} className="relative"> {/* Wrapper for ScrollProgressBar context */}
-      <ScrollProgressBar scrollYProgress={scrollYProgress} />
-      <Section id="about" className="overflow-hidden"> {/* Section component for padding and container */}
+    <div ref={sectionWrapperRef} className="relative">
+      {/* <ScrollProgressBar scrollYProgress={scrollYProgress} /> Removed ScrollProgressBar */}
+      <Section id="about" className="overflow-hidden"> 
         <motion.div
           style={{ perspective: '1200px' }}
         >
@@ -109,28 +110,29 @@ export function AboutSection() {
               A Bit About My Journey
             </motion.h2>
 
-            {/* Grid layout for desktop, stacked for mobile */}
+            
             <div className="flex flex-col md:grid md:grid-cols-12 gap-8 md:gap-10 lg:gap-12 items-start mb-12 md:mb-16">
               <motion.div
                 variants={itemVariants}
                 custom={reducedMotion ? "bottom" : "left"}
-                className="w-full md:col-span-4 flex justify-center items-center" // Full width on mobile for centering
+                className="w-full md:col-span-4 flex justify-center items-center" 
               >
                 <DynamicPhoto
                   src="https://picsum.photos/id/1005/400/400"
                   alt="Your Name - Professional Portrait"
+                  data-ai-hint="professional portrait"
                 />
               </motion.div>
               <motion.div
                 variants={itemVariants}
                 custom={reducedMotion ? "bottom" : "right"}
-                className="w-full md:col-span-8" // Full width on mobile
+                className="w-full md:col-span-8" 
               >
                 <JourneyTimeline milestones={journeyMilestones} />
               </motion.div>
             </div>
 
-            {/* SkillUniverse removed, will be replaced by TechSkillsSection */}
+            
           </motion.div>
         </motion.div>
       </Section>

@@ -64,8 +64,13 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2 text-2xl font-bold" onClick={closeMobileMenu}>
             <Terminal size={28} className="text-[hsl(var(--primary))]" />
-            <span className="gradient-text">Haziq Sumaid</span>
+            <span className="gradient-text">HS</span>
+            <motion.span
+              className="gradient-text text-xl font-bold"
+              animate={{ opacity: [1, 0, 1] }} // Animate opacity from 1 to 0 and back to 1
+              transition={{ repeat: Infinity, duration: 1, ease: "easeInOut" }}>.</motion.span>
           </Link>
+
 
           <nav className="hidden md:flex items-center space-x-1 relative">
             {navItems.map((item) => (
@@ -124,8 +129,11 @@ export function Navbar() {
                   <SheetTitle>
                      <Link href="/" className="flex items-center gap-2 text-2xl font-bold" onClick={closeMobileMenu}>
                        <Terminal size={28} className="text-[hsl(var(--primary))]" />
-                       <span className="gradient-text">Your Name</span>
-                    </Link>
+                       <span className="gradient-text">HS</span>
+                       <motion.span
+                         className="gradient-text text-xl font-bold"
+                         animate={{ opacity: [1, 0, 1] }} // Animate opacity from 1 to 0 and back to 1
+                         transition={{ repeat: Infinity, duration: 1, ease: "easeInOut" }}>.</motion.span>                    </Link>
                   </SheetTitle>
                 </SheetHeader>
                 <motion.ul
