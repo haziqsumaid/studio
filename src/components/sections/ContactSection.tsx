@@ -18,7 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Section } from '@/components/Section';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Github, Linkedin, Twitter, Send, Mail, Phone, MapPin, Users, MessageSquarePlus, Lightbulb, RefreshCcw } from 'lucide-react';
+import { Github, Linkedin, Twitter, Send, Mail, Phone, MapPin, Users, Lightbulb, RefreshCcw } from 'lucide-react';
 import Link from "next/link";
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from 'react';
@@ -140,39 +140,73 @@ export function ContactSection() {
 
 
   async function onSubmit(data: ContactFormValues) {
-    form.control.disabled = true; 
+    form.control.disabled = true;
     try {
       const response = await fetch('/api/contact', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
 
-      const result = await response.json();
-
       if (!response.ok) {
-        throw new Error(result.error || 'Network response was not ok');
+        let errorData;
+        let errorMessage = `Server error: ${response.status} ${response.statusText}`;
+        // Try to parse error response as JSON, as our API should return JSON errors
+        if (response.headers.get('content-type')?.includes('application/json')) {
+          try {
+            errorData = await response.json();
+            if (errorData && errorData.error) {
+              errorMessage = errorData.error;
+              if (errorData.issues && Array.isArray(errorData.issues)) { // For Zod validation errors
+                errorMessage += `: ${errorData.issues.map((issue: any) => issue.message).join(', ')}`;
+              }
+            }
+          } catch (e) {
+            // If error response is not JSON, use the status text or a generic message.
+             console.warn("Could not parse error response as JSON:", e);
+          }
+        }
+        throw new Error(errorMessage);
       }
+
+      // If response.ok, expect a JSON success message
+      const result = await response.json(); // This could still throw if body is not JSON despite 2xx status
 
       toast({
         title: "Message Sent!",
-        description: "Thanks for reaching out. I'll get back to you soon.",
+        description: result.message || "Thanks for reaching out. I'll get back to you soon.",
         variant: "default",
         className: "bg-green-500/20 border-green-500 text-foreground"
       });
       form.reset();
       setCurrentMessage("");
       setIsAiPanelOpen(false);
+
     } catch (error) {
+      let displayMessage = "An unexpected error occurred. Please try again.";
+      if (error instanceof Error) {
+        const lowerCaseErrorMessage = error.message.toLowerCase();
+        if (lowerCaseErrorMessage.includes("failed to fetch")) {
+          displayMessage = "Cannot connect to the server. Please check your internet connection and try again.";
+        } else if (lowerCaseErrorMessage.includes("unexpected end of json input") || 
+                   lowerCaseErrorMessage.includes("unexpected token") ||
+                   lowerCaseErrorMessage.includes("invalid json")) {
+          displayMessage = "Received an invalid response from the server. Please try again later.";
+          console.error("Detailed error for invalid server response:", error); // Log original error for debugging
+        } else {
+          // Use the specific error message if it's not one of the above common issues.
+          // This could be a message from `throw new Error(errorMessage)` in the try block.
+          displayMessage = error.message; 
+        }
+      }
+      
       toast({
         title: "Uh oh! Something went wrong.",
-        description: error instanceof Error ? error.message : "There was a problem sending your message. Please try again.",
+        description: displayMessage,
         variant: "destructive",
       });
     } finally {
-       form.control.disabled = false; 
+      form.control.disabled = false;
     }
   }
 
