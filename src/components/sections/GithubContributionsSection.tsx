@@ -1,3 +1,4 @@
+/** @jsxImportSource react */
 "use client";
 
 import Link from 'next/link';
@@ -15,6 +16,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 interface ContributionDay {
   date: string;
   count: number;
+  level: 0 | 1 | 2 | 3 | 4; // Add level to contribution day
 }
 
 const gridContainerVariants = {
@@ -38,36 +40,59 @@ const loadingTextVariants = {
   transition: { duration: 1.5, repeat: Infinity, ease: "easeInOut" }
 };
 
-// Adjusted opacity for better visibility of green shades
-const CONTRIBUTION_LEVEL_COLORS = [
-  'hsl(var(--muted))', // 0 contributions
-  'hsla(var(--chart-git-1))', // Level 1 (was 0.2)
-  'hsla(var(--chart-git-2))', // Level 2 (was 0.4)
-  'hsla(var(--chart-git-3))', // Level 3 (was 0.7)
-  'hsla(var(--chart-git-4))', // Level 4 (Full Green, no change)
+
+const CONTRIBUTION_LEVEL_COLORS_LIGHT: string[] = [
+  'hsl(var(--chart-git-0))', 
+  'hsl(var(--chart-git-1))', 
+  'hsl(var(--chart-git-2))', 
+  'hsl(var(--chart-git-3))', 
+  'hsl(var(--chart-git-4))', 
 ];
 
-const getContributionColor = (count: number, maxContributionsInPeriod: number = 10): string => {
-  if (count === 0) return CONTRIBUTION_LEVEL_COLORS[0];
-  if (maxContributionsInPeriod === 0) return CONTRIBUTION_LEVEL_COLORS[1]; // If max is 0 but count > 0, show lightest green
-  if (count >= maxContributionsInPeriod * 0.75) return CONTRIBUTION_LEVEL_COLORS[4];
-  if (count >= maxContributionsInPeriod * 0.5) return CONTRIBUTION_LEVEL_COLORS[3];
-  if (count >= maxContributionsInPeriod * 0.25) return CONTRIBUTION_LEVEL_COLORS[2];
-  return CONTRIBUTION_LEVEL_COLORS[1];
+const CONTRIBUTION_LEVEL_COLORS_DARK: string[] = [
+  'hsl(var(--muted))', // For 0 contributions in dark mode
+  'hsl(var(--chart-git-1))', // Dark theme green level 1
+  'hsl(var(--chart-git-2))', // Dark theme green level 2
+  'hsl(var(--chart-git-3))', // Dark theme green level 3
+  'hsl(var(--chart-git-4))', // Dark theme green level 4
+];
+
+const getContributionColor = (level: 0 | 1 | 2 | 3 | 4, currentTheme: string | undefined): string => {
+  const colors = currentTheme === 'dark' ? CONTRIBUTION_LEVEL_COLORS_DARK : CONTRIBUTION_LEVEL_COLORS_LIGHT;
+  return colors[level] || colors[0]; // Fallback to level 0 color
 };
 
 
 export function GithubContributionsSection() {
   const githubUsername = process.env.NEXT_PUBLIC_GITHUB_USERNAME || "yourusername";
-  const [contributions, setContributions] = useState<ContributionDay[][]>([]);
-  const [totalContributions, setTotalContributions] = useState(0);
+  const [contributionsData, setContributionsData] = useState<{
+    total: { [year: string]: number; lastYear: number; };
+    contributions: ContributionDay[][];
+  } | null>(null);
+  
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const reducedMotion = useReducedMotion();
   const [isClient, setIsClient] = useState(false);
+  const [theme, setTheme] = useState<string | undefined>(undefined);
+
 
   useEffect(() => {
     setIsClient(true);
+    // Determine theme on client-side
+    const storedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    setTheme(storedTheme ? storedTheme : (prefersDark ? "dark" : "light"));
+
+    // Listen for theme changes if your ThemeContext exposes an event or you poll localStorage
+    const handleThemeChange = () => {
+       const newTheme = localStorage.getItem("theme");
+       if (newTheme) setTheme(newTheme);
+    };
+    window.addEventListener('storage', handleThemeChange); // Or a custom event from your theme context
+
+    return () => window.removeEventListener('storage', handleThemeChange);
+
   }, []);
 
   useEffect(() => {
@@ -76,16 +101,14 @@ export function GithubContributionsSection() {
     if (!githubUsername) {
       setError("GitHub username is not configured. Please set NEXT_PUBLIC_GITHUB_USERNAME in your .env file.");
       setIsLoading(false);
-      setContributions([]);
-      setTotalContributions(0);
+      setContributionsData(null);
       return;
     }
     
     if (githubUsername === "yourusername") {
       setError("Please set your GitHub username in .env.local (NEXT_PUBLIC_GITHUB_USERNAME) to see your contributions.");
       setIsLoading(false);
-      setContributions([]);
-      setTotalContributions(0);
+      setContributionsData(null);
       return;
     }
 
@@ -93,7 +116,6 @@ export function GithubContributionsSection() {
     setError(null);
     const fetchContributions = async () => {
       try {
-        // Using a more reliable API for GitHub contributions
         const res = await fetch(
           `https://github-contributions-api.jogruber.de/v4/${githubUsername}?y=last`
         );
@@ -101,17 +123,18 @@ export function GithubContributionsSection() {
           throw new Error(`Failed to fetch contributions: ${res.status} ${res.statusText}`);
         }
         const data = await res.json();
+
         if (!data.contributions || !data.total || typeof data.total.lastYear === 'undefined') {
           console.warn("GitHub API response might be malformed:", data);
           throw new Error('Invalid data format from GitHub contributions API');
         }
-        setContributions(data.contributions);
-        setTotalContributions(data.total.lastYear);
+        
+        setContributionsData(data);
+
       } catch (err) {
         console.error('Error fetching GitHub contributions:', err);
         setError(err instanceof Error ? err.message : 'An unknown error occurred while fetching contributions.');
-        setContributions([]); // Clear contributions on error
-        setTotalContributions(0); // Clear total on error
+        setContributionsData(null); 
       } finally {
         setIsLoading(false);
       }
@@ -120,10 +143,8 @@ export function GithubContributionsSection() {
     fetchContributions();
   }, [githubUsername, isClient]);
 
-  const maxContributionsInFetchedData = useMemo(() => {
-    if (!contributions || contributions.length === 0) return 10; // Default if no data or error
-    return contributions.flat().reduce((max, day) => Math.max(max, day ? day.count : 0), 0) || 10; // Added check for day
-  }, [contributions]);
+  const contributions = contributionsData?.contributions || [];
+  const totalContributions = contributionsData?.total.lastYear || 0;
 
 
   return (
@@ -184,8 +205,8 @@ export function GithubContributionsSection() {
                   initial="hidden"
                   animate="visible"
                 >
-                  {contributions.flat().filter(day => day).map((day, index) => { // Added filter for potentially null/undefined days
-                    const color = getContributionColor(day.count, maxContributionsInFetchedData);
+                  {contributions.flat().filter(day => day).map((day, index) => { 
+                    const color = getContributionColor(day.level, theme);
 
                     return (
                       <TooltipProvider key={day.date || `day-${index}`} delayDuration={100}>
@@ -203,7 +224,7 @@ export function GithubContributionsSection() {
                               } : {}}
                             />
                           </TooltipTrigger>
-                           <TooltipContent className="bg-popover text-popover-foreground p-1.5 text-xs rounded-md shadow-lg border border-border">
+                           <TooltipContent className="bg-popover/80 backdrop-blur-sm text-popover-foreground p-1.5 text-xs rounded-md shadow-lg border border-border/30">
                              <p className="font-semibold">{`${day.count} contribution${day.count === 1 ? '' : 's'}`}</p>
                              <p className="text-muted-foreground">{new Date(day.date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</p>
                            </TooltipContent>
@@ -228,8 +249,8 @@ export function GithubContributionsSection() {
                 asChild 
                 variant="outline" 
                 size="sm" 
-                // className="gradient-button-outline"
-                disabled={isLoading || githubUsername === "yourusername" || !githubUsername} // Added isLoading to disabled check
+                className="border-primary/50 text-primary/80 hover:border-primary hover:text-primary hover:bg-primary/10 transition-colors"
+                disabled={isLoading || githubUsername === "yourusername" || !githubUsername}
               >
                 <Link href={`https://github.com/${githubUsername}`} target="_blank" rel="noopener noreferrer">
                   <Github className="mr-2 h-4 w-4" /> <span>View GitHub Profile</span>
