@@ -124,7 +124,10 @@ export function ContactSection() {
 
 
   async function onSubmit(data: ContactFormValues) {
-    form.control.disabled = true;
+    // Directly disable form fields using formState's isSubmitting
+    // form.control.disabled = true; // This is not standard RHF API for disabling.
+    // isSubmitting is automatically managed by RHF.
+
     try {
       const response = await fetch('/api/contact', {
         method: 'POST',
@@ -173,9 +176,9 @@ export function ContactSection() {
         description: displayMessage,
         variant: "destructive",
       });
-    } finally {
-      form.control.disabled = false;
-    }
+    } 
+    // RHF automatically sets isSubmitting to false after submission attempt
+    // No need for: form.control.disabled = false;
   }
 
   return (
@@ -306,29 +309,29 @@ export function ContactSection() {
                     )}
                     </AnimatePresence>
 
-
-                    <Button 
-                      type="submit" 
-                      className="w-full gradient-button text-lg py-3 shadow-lg hover:shadow-xl focus:ring-2 focus:ring-ring focus:ring-offset-2" 
+                    <Button
+                      type="submit"
+                      asChild
                       disabled={form.formState.isSubmitting}
-                      
-                      whileTap={!isReducedMotionActive ? { scale: 0.97 } : {}}
-                      transition={!isReducedMotionActive ? { type: "spring", stiffness: 400, damping: 17 } : {}}
-                      // @ts-ignore
-                      as={motion.button}
+                      className="w-full gradient-button text-lg py-3 shadow-lg hover:shadow-xl focus:ring-2 focus:ring-ring focus:ring-offset-2"
                     >
-                      <AnimatePresence mode="wait">
-                        {form.formState.isSubmitting ? (
-                          <motion.span key="sending" initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }} className="flex items-center">
-                            <motion.div className="mr-2.5" animate={{rotate:360}} transition={{duration:1, repeat:Infinity, ease:"linear"}}><Send size={18}/></motion.div>
-                            Sending...
-                          </motion.span>
-                        ) : (
-                          <motion.span key="send" initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }} className="flex items-center">
-                            <Send size={18} className="mr-2.5"/>Send Message
-                          </motion.span>
-                        )}
-                      </AnimatePresence>
+                      <motion.button
+                        whileTap={!isReducedMotionActive ? { scale: 0.97 } : {}}
+                        transition={!isReducedMotionActive ? { type: "spring", stiffness: 400, damping: 17 } : {}}
+                      >
+                        <AnimatePresence mode="wait">
+                          {form.formState.isSubmitting ? (
+                            <motion.span key="sending" initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }} className="flex items-center">
+                              <motion.div className="mr-2.5" animate={{rotate:360}} transition={{duration:1, repeat:Infinity, ease:"linear"}}><Send size={18}/></motion.div>
+                              Sending...
+                            </motion.span>
+                          ) : (
+                            <motion.span key="send" initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }} className="flex items-center">
+                              <Send size={18} className="mr-2.5"/>Send Message
+                            </motion.span>
+                          )}
+                        </AnimatePresence>
+                      </motion.button>
                     </Button>
                   </form>
                 </Form>
@@ -403,4 +406,3 @@ export function ContactSection() {
     </Section>
   );
 }
-
