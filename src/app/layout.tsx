@@ -63,12 +63,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn('antialiased text-foreground font-sans')}>
+      <body className={cn('antialiased text-foreground font-sans')}> {/* bg-background is NOT applied here, allowing AnimatedBackground to be the base */}
         <ThemeProvider>
           <MotionConfig reducedMotion="user">
-            <AnimatedBackground />
-            {/* Removed bg-background from this div to allow AnimatedBackground to show */}
-            <div className="relative z-10 flex flex-col min-h-screen"> 
+            <AnimatedBackground /> {/* Rendered first, intended to be behind content */}
+            {/* This div wraps the main page content. It needs to be above AnimatedBackground and allow transparency if no explicit bg is set. */}
+            <div className="relative z-10 flex flex-col min-h-screen bg-transparent"> 
               <Navbar />
               <main className="pt-16 flex-grow"> 
                 {children}
@@ -82,4 +82,3 @@ export default function RootLayout({
     </html>
   );
 }
-
