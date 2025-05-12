@@ -38,7 +38,7 @@ const iconHoverVariants = {
   hover: {
     scale: 1.2,
     color: "hsl(var(--primary))",
-    backgroundColor: "hsla(var(--primary-rgb), 0.1)", // Use primary with low opacity
+    backgroundColor: "hsla(var(--primary-rgb), 0.1)", 
     transition: { type: "spring", stiffness: 300, damping: 15 }
   },
 };
@@ -52,12 +52,6 @@ const inputFocusVariants = {
   rest: { scale: 1, borderColor: "hsl(var(--input))" },
   focus: { scale: 1.02, borderColor: "hsl(var(--ring))", boxShadow: "0 0 0 2px hsl(var(--ring) / 0.2)" },
 };
-
-const contactInfoItems = [
-  { icon: <Mail size={20} className="text-primary" />, text: "haziqsumaid4@gmail.com", href: "mailto:haziqsumaid4@gmail.com", label: "Email" },
-  { icon: <Phone size={20} className="text-primary" />, text: "+92 315 1518001", href: "tel:+923151518001", label: "Phone" },
-  { icon: <MapPin size={20} className="text-primary" />, text: "Rawalpindi, Pakistan", label: "Location" },
-];
 
 const aiSuggestionPrompts = [
     "Suggest a friendly opening for a project inquiry.",
@@ -90,52 +84,42 @@ export function ContactSection() {
   }, [framerReducedMotion]);
 
   const socialIconResolvedVariants = isReducedMotionActive ? {} : iconHoverVariants;
+  
+  const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "your.email@example.com";
+  const contactPhone = process.env.NEXT_PUBLIC_CONTACT_PHONE || "+1234567890";
+  const contactLocation = process.env.NEXT_PUBLIC_CONTACT_LOCATION || "City, Country";
 
-  // async function getAiSuggestions(messageContent: string) {
-  //   if (!messageContent.trim()) {
-  //     setAiSuggestions(aiSuggestionPrompts.map(prompt => `Click to generate: "${prompt}"`));
-  //     return;
-  //   }
-  //   setIsGeneratingSuggestions(true);
-  //   // In a real app, you'd call your GenAI flow here.
-  //   // For this example, we'll simulate a delay and provide placeholder suggestions.
-  //   await new Promise(resolve => setTimeout(resolve, 1500)); 
-    
-  //   const generated = [
-  //       `Reworded: "${messageContent.substring(0,30)}..." (Option 1)`,
-  //       `Professional: "${messageContent.substring(0,30)}..." (Option 2)`,
-  //       `Concise: "${messageContent.substring(0,20)}..." (Option 3)`,
-  //   ];
-  //   setAiSuggestions(generated);
-  //   setIsGeneratingSuggestions(false);
-  // }
+  const socialGithub = process.env.NEXT_PUBLIC_SOCIAL_GITHUB || "https://github.com/yourusername";
+  const socialLinkedin = process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN || "https://linkedin.com/in/yourusername";
+  const socialTwitter = process.env.NEXT_PUBLIC_SOCIAL_TWITTER || "https://twitter.com/yourusername";
+
+
+  const contactInfoItems = [
+    { icon: <Mail size={20} className="text-primary" />, text: contactEmail, href: `mailto:${contactEmail}`, label: "Email" },
+    { icon: <Phone size={20} className="text-primary" />, text: contactPhone, href: `tel:${contactPhone.replace(/\s/g, '')}`, label: "Phone" },
+    { icon: <MapPin size={20} className="text-primary" />, text: contactLocation, label: "Location" },
+  ];
+
 
   const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newMessage = e.target.value;
     form.setValue("message", newMessage);
     setCurrentMessage(newMessage);
-    // if (isAiPanelOpen) {
-    //   getAiSuggestions(newMessage);
-    // }
   };
 
   const toggleAiPanel = () => {
     const newPanelState = !isAiPanelOpen;
     setIsAiPanelOpen(newPanelState);
-    // if (newPanelState) {
-    //   getAiSuggestions(currentMessage);
-    // }
   };
   
   const applySuggestion = (suggestion: string) => {
-    // Placeholder: actual application logic would be more sophisticated
     const actualSuggestionText = suggestion.startsWith("Click to generate:") 
-      ? suggestion.substring("Click to generate: ".length).replace(/"/g, "") // Example, actually generate if it's a prompt
+      ? suggestion.substring("Click to generate: ".length).replace(/"/g, "") 
       : suggestion.substring(suggestion.indexOf('"') + 1, suggestion.lastIndexOf('"'));
 
     form.setValue("message", actualSuggestionText);
     setCurrentMessage(actualSuggestionText);
-    setIsAiPanelOpen(false); // Close panel after applying
+    setIsAiPanelOpen(false); 
   };
 
 
@@ -148,30 +132,16 @@ export function ContactSection() {
         body: JSON.stringify(data),
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        let errorData;
-        let errorMessage = `Server error: ${response.status} ${response.statusText}`;
-        // Try to parse error response as JSON, as our API should return JSON errors
-        if (response.headers.get('content-type')?.includes('application/json')) {
-          try {
-            errorData = await response.json();
-            if (errorData && errorData.error) {
-              errorMessage = errorData.error;
-              if (errorData.issues && Array.isArray(errorData.issues)) { // For Zod validation errors
-                errorMessage += `: ${errorData.issues.map((issue: any) => issue.message).join(', ')}`;
-              }
-            }
-          } catch (e) {
-            // If error response is not JSON, use the status text or a generic message.
-             console.warn("Could not parse error response as JSON:", e);
-          }
+        let errorMessage = result.error || `Server error: ${response.status} ${response.statusText}`;
+        if (result.issues && Array.isArray(result.issues)) { 
+          errorMessage += `: ${result.issues.map((issue: any) => issue.message).join(', ')}`;
         }
         throw new Error(errorMessage);
       }
-
-      // If response.ok, expect a JSON success message
-      const result = await response.json(); // This could still throw if body is not JSON despite 2xx status
-
+      
       toast({
         title: "Message Sent!",
         description: result.message || "Thanks for reaching out. I'll get back to you soon.",
@@ -192,10 +162,8 @@ export function ContactSection() {
                    lowerCaseErrorMessage.includes("unexpected token") ||
                    lowerCaseErrorMessage.includes("invalid json")) {
           displayMessage = "Received an invalid response from the server. Please try again later.";
-          console.error("Detailed error for invalid server response:", error); // Log original error for debugging
+          console.error("Detailed error for invalid server response:", error); 
         } else {
-          // Use the specific error message if it's not one of the above common issues.
-          // This could be a message from `throw new Error(errorMessage)` in the try block.
           displayMessage = error.message; 
         }
       }
@@ -343,9 +311,10 @@ export function ContactSection() {
                       type="submit" 
                       className="w-full gradient-button text-lg py-3 shadow-lg hover:shadow-xl focus:ring-2 focus:ring-ring focus:ring-offset-2" 
                       disabled={form.formState.isSubmitting}
-                      // @ts-ignore 
+                      
                       whileTap={!isReducedMotionActive ? { scale: 0.97 } : {}}
                       transition={!isReducedMotionActive ? { type: "spring", stiffness: 400, damping: 17 } : {}}
+                      // @ts-ignore
                       as={motion.button}
                     >
                       <AnimatePresence mode="wait">
@@ -407,9 +376,9 @@ export function ContactSection() {
             </h3>
             <div className="flex space-x-4">
               {[
-                { href: "https://github.com/haziqsumaid", icon: Github, label: "GitHub" },
-                { href: "https://linkedin.com/in/haziqsumaid", icon: Linkedin, label: "LinkedIn" },
-                { href: "https://twitter.com/haziqsumaid", icon: Twitter, label: "Twitter" },
+                { href: socialGithub, icon: Github, label: "GitHub" },
+                { href: socialLinkedin, icon: Linkedin, label: "LinkedIn" },
+                { href: socialTwitter, icon: Twitter, label: "Twitter" },
               ].map((social, index) => (
                 <motion.div 
                   key={social.label}

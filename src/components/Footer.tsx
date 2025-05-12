@@ -28,28 +28,33 @@ export function Footer() {
 
   const variants = isReducedMotionActive ? {} : iconHoverVariants;
 
+  const yourName = process.env.NEXT_PUBLIC_YOUR_NAME || "Your Name";
+  const githubUrl = process.env.NEXT_PUBLIC_SOCIAL_GITHUB || "https://github.com/yourusername";
+  const linkedinUrl = process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN || "https://linkedin.com/in/yourusername";
+  const twitterUrl = process.env.NEXT_PUBLIC_SOCIAL_TWITTER || "https://twitter.com/yourusername";
+
   return (
     <footer className="bg-background border-t border-border/50 py-8 text-center text-muted-foreground">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-center space-x-6 mb-4">
           <motion.div initial="initial" whileHover="hover" variants={variants}>
-            <Link href="https://github.com/yourusername" target="_blank" rel="noopener noreferrer" aria-label="GitHub" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Link href={githubUrl} target="_blank" rel="noopener noreferrer" aria-label="GitHub" className="text-muted-foreground hover:text-foreground transition-colors">
               <Github size={24} />
             </Link>
           </motion.div>
           <motion.div initial="initial" whileHover="hover" variants={variants}>
-            <Link href="https://linkedin.com/in/yourusername" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Link href={linkedinUrl} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-muted-foreground hover:text-foreground transition-colors">
               <Linkedin size={24} />
             </Link>
           </motion.div>
           <motion.div initial="initial" whileHover="hover" variants={variants}>
-            <Link href="https://twitter.com/yourusername" target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Link href={twitterUrl} target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="text-muted-foreground hover:text-foreground transition-colors">
               <Twitter size={24} />
             </Link>
           </motion.div>
         </div>
         <p className="text-sm">
-          &copy; {new Date().getFullYear()} Your Name. All rights reserved.
+          &copy; {new Date().getFullYear()} {yourName}. All rights reserved.
         </p>
         <p className="text-xs mt-2">
           Built with Next.js, Tailwind CSS, and Framer Motion.
@@ -58,3 +63,4 @@ export function Footer() {
     </footer>
   );
 }
+

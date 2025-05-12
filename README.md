@@ -57,9 +57,18 @@ This is a personal portfolio website for a Senior Node.js Backend Developer & De
     # General Site Configuration
     # NEXT_PUBLIC_SITE_URL=http://localhost:3000 (for local dev)
     # NEXT_PUBLIC_SITE_URL=https://yourdomain.com (for production)
+    NEXT_PUBLIC_YOUR_NAME="Your Name" # Used for CV filename, footer copyright, etc.
     
     # GitHub Contributions Section
     NEXT_PUBLIC_GITHUB_USERNAME=yourgithubusername 
+
+    # Contact Information & Social Links (for client-side display in ContactSection & Footer)
+    NEXT_PUBLIC_CONTACT_EMAIL="your.email@example.com"
+    NEXT_PUBLIC_CONTACT_PHONE="+1234567890"
+    NEXT_PUBLIC_CONTACT_LOCATION="City, Country"
+    NEXT_PUBLIC_SOCIAL_GITHUB="https://github.com/yourusername"
+    NEXT_PUBLIC_SOCIAL_LINKEDIN="https://linkedin.com/in/yourusername"
+    NEXT_PUBLIC_SOCIAL_TWITTER="https://twitter.com/yourusername"
 
     # Nodemailer Configuration (for Contact Form)
     SMTP_HOST=your_smtp_host_address # e.g., smtp.gmail.com
@@ -154,10 +163,11 @@ pnpm typecheck
 ## Customization
 
 - **Content**: 
-    - Update text (e.g., "Your Name", "yourusername", email in `src/components/sections/ContactSection.tsx`), images, and project details in the respective components located in `src/components/sections/` and `src/components/Navbar.tsx`, `src/components/Footer.tsx`.
+    - Update text (e.g., set `NEXT_PUBLIC_YOUR_NAME` in `.env.local`), images, and project details in the respective components located in `src/components/sections/` and `src/components/Navbar.tsx`, `src/components/Footer.tsx`.
     - Skills data can be customized in `src/config/skills.ts`. Update skill names, proficiency levels, experience, icons, and descriptions.
-- **CV**: Replace `public/placeholder-cv.pdf` with your actual CV. The link is in `src/components/sections/HeroSection.tsx`.
-- **Social Links**: Update links in `src/components/Footer.tsx` and `src/components/sections/ContactSection.tsx`.
+- **CV**: Replace `public/placeholder-cv.pdf` with your actual CV. The link is in `src/components/sections/HeroSection.tsx`. The downloaded filename uses `NEXT_PUBLIC_YOUR_NAME`.
+- **Social Links**: Update `NEXT_PUBLIC_SOCIAL_GITHUB`, `NEXT_PUBLIC_SOCIAL_LINKEDIN`, `NEXT_PUBLIC_SOCIAL_TWITTER` in `.env.local`. These are used in `src/components/Footer.tsx` and `src/components/sections/ContactSection.tsx`.
+- **Contact Info**: Update `NEXT_PUBLIC_CONTACT_EMAIL`, `NEXT_PUBLIC_CONTACT_PHONE`, `NEXT_PUBLIC_CONTACT_LOCATION` in `.env.local` for display in `src/components/sections/ContactSection.tsx`.
 - **GitHub Contributions**: 
     - Set `NEXT_PUBLIC_GITHUB_USERNAME` in your `.env` or `.env.local` file.
     - The section dynamically fetches and displays contributions for this username.
@@ -165,7 +175,7 @@ pnpm typecheck
 - **Domain & Metadata**:
     - Replace `https://yourdomain.com` in `public/sitemap.xml` and `src/app/layout.tsx` with your actual domain.
     - Update `YYYY-MM-DD` in `public/sitemap.xml` to the current date.
-    - Update social media handles and image paths in `src/app/layout.tsx` for `openGraph` and `twitter` metadata.
+    - Update social media handles (if applicable, though currently read from env vars) and image paths in `src/app/layout.tsx` for `openGraph` and `twitter` metadata.
 - **Theme**: Colors and styles can be adjusted in `src/app/globals.css` and Tailwind configuration (`tailwind.config.ts`). The site supports light and dark modes.
 - **AI Email Suggestions**: Ensure `GOOGLE_API_KEY` is set in your environment for this feature to work. The AI model used is `gemini-pro`. Prompts can be adjusted in `src/ai/flows/email-suggestions-flow.ts`.
 
@@ -176,3 +186,5 @@ pnpm typecheck
 ## Deployment
 
 This project can be deployed to platforms like Vercel, Netlify, or any hosting provider that supports Node.js/Docker. A basic GitHub Actions workflow is provided in `.github/workflows/ci-cd.yml` for automated building and testing. You can extend this for deployment to your chosen platform. Remember to configure your production environment variables on your hosting platform.
+
+```
