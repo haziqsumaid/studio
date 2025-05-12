@@ -24,11 +24,11 @@ interface IconConfig {
   initialY: string;
   driftXAmount: number;
   driftYAmount: number;
-  maxPulseOpacity: number; // Renamed from baseOpacity
+  maxPulseOpacity: number; 
   animationDelay: number;
   driftDurationX: number;
   driftDurationY: number;
-  pulseDuration: number; // Duration for one cycle of appear/disappear/blur
+  pulseDuration: number; 
   size: number;
 }
 
@@ -48,8 +48,7 @@ export function AnimatedBackground() {
     if (!isClient) return []; 
 
     const isMobileView = typeof window !== 'undefined' && window.innerWidth < 768;
-    // Renamed testVisibilityOpacity to targetMaxPulseOpacity for clarity
-    const targetMaxPulseOpacity = getRandom(0.08, 0.15); // Defines peak visibility during pulse
+    const targetMaxPulseOpacity = getRandom(0.1, 0.2); // Slightly increased maxPulseOpacity range
 
     if (isReducedMotionActive) {
         const staticIconsConfig = [];
@@ -65,9 +64,9 @@ export function AnimatedBackground() {
                 initialX: positions[i % positions.length].x,
                 initialY: positions[i % positions.length].y,
                 driftXAmount: 0, driftYAmount: 0, 
-                maxPulseOpacity: 0.1, // Static icons have a fixed, low opacity
+                maxPulseOpacity: 0.1, 
                 animationDelay: 0, driftDurationX: 0, driftDurationY: 0, 
-                pulseDuration: 0, // No pulse for static
+                pulseDuration: 0, 
                 size: isMobileView ? 18 : 22,
             });
         }
@@ -104,7 +103,7 @@ export function AnimatedBackground() {
         animationDelay: getRandom(0.1, numIcons * 0.15), 
         driftDurationX: getRandom(isMobileView ? 10 : 8, isMobileView ? 18 : 15), 
         driftDurationY: getRandom(isMobileView ? 10 : 8, isMobileView ? 18 : 15), 
-        pulseDuration: getRandom(2.5, 5), // Faster twinkle/focus effect
+        pulseDuration: getRandom(2.5, 5), 
         size: isMobileView ? 18 : 24,
       });
     }
@@ -116,7 +115,6 @@ export function AnimatedBackground() {
   }
 
   return (
-    // Added animated-bg-container class to apply bg-background from globals.css
     <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none animated-bg-container" aria-hidden="true"> 
       {iconConfigs.map(config => (
         <AnimatedIcon
@@ -126,7 +124,7 @@ export function AnimatedBackground() {
           initialY={config.initialY}
           driftXAmount={config.driftXAmount}
           driftYAmount={config.driftYAmount}
-          maxPulseOpacity={config.maxPulseOpacity} // Passed renamed prop
+          maxPulseOpacity={config.maxPulseOpacity} 
           animationDelay={config.animationDelay}
           driftDurationX={config.driftDurationX}
           driftDurationY={config.driftDurationY}

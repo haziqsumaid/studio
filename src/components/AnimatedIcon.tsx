@@ -11,11 +11,11 @@ interface AnimatedIconProps {
   initialY: string; 
   driftXAmount: number; 
   driftYAmount: number; 
-  maxPulseOpacity: number; // Renamed from baseOpacity, defines peak opacity during pulse
+  maxPulseOpacity: number; 
   animationDelay: number; 
   driftDurationX: number;
   driftDurationY: number;
-  pulseDuration: number; // Duration for one pulse cycle (appear/disappear/blur)
+  pulseDuration: number; 
   size?: number;
   color?: string;
   isReducedMotion: boolean;
@@ -46,7 +46,7 @@ const AnimatedIcon: FC<AnimatedIconProps> = ({
           left: initialX,
           top: initialY,
           transform: 'translate(-50%, -50%)', 
-          opacity: maxPulseOpacity * 0.5, // Static icons have a fixed, dim opacity
+          opacity: maxPulseOpacity * 0.5, 
         }}
       >
         <IconComponent size={size} color={color} />
@@ -63,7 +63,7 @@ const AnimatedIcon: FC<AnimatedIconProps> = ({
         top: initialY,
       }}
       initial={{ opacity: 0, x: '-50%', y: '-50%' }} 
-      animate={{ opacity: 1, x: '-50%', y: '-50%' }} // Fade in the container to enable child animations
+      animate={{ opacity: 1, x: '-50%', y: '-50%' }} 
       transition={{ duration: 0.5, delay: animationDelay * 0.2 }} 
     >
       {/* Inner div for continuous drift, opacity pulse, blur pulse, and glow pulse animations */}
@@ -71,13 +71,11 @@ const AnimatedIcon: FC<AnimatedIconProps> = ({
         animate={{
           x: [0, driftXAmount, 0, -driftXAmount, 0],
           y: [0, driftYAmount, 0, -driftYAmount, 0],
-          opacity: [maxPulseOpacity * 0.15, maxPulseOpacity], 
+          opacity: [maxPulseOpacity * 0.3, maxPulseOpacity * 0.9], // Adjusted opacity range for better visibility
           filter: ['blur(2.5px)', 'blur(0px)'], 
-          // Glow effect using boxShadow, synced with opacity and blur
-          // hsla(var(--primary-rgb), alpha_value) for theme-aware color
           boxShadow: [
-            '0 0 0px 0px hsla(var(--primary-rgb), 0)',        // Start/End: no glow, transparent
-            '0 0 15px 5px hsla(var(--primary-rgb), 0.4)', // Peak: visible glow, themed color
+            '0 0 0px 0px hsla(var(--glow-color-rgb), 0)', // Use --glow-color-rgb
+            '0 0 15px 5px hsla(var(--glow-color-rgb), 0.4)', // Use --glow-color-rgb
           ],
         }}
         transition={{
@@ -109,7 +107,7 @@ const AnimatedIcon: FC<AnimatedIconProps> = ({
             repeatType: 'mirror', 
             delay: animationDelay,
           },
-          boxShadow: { // Transition for the glow effect
+          boxShadow: { 
             duration: pulseDuration,
             repeat: Infinity,
             ease: 'easeInOut',
