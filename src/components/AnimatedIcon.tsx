@@ -27,7 +27,7 @@ const AnimatedIcon: FC<AnimatedIconProps> = ({
   initialY,
   driftXAmount,
   driftYAmount,
-  maxPulseOpacity, // Using renamed prop
+  maxPulseOpacity, 
   animationDelay,
   driftDurationX,
   driftDurationY,
@@ -66,15 +66,19 @@ const AnimatedIcon: FC<AnimatedIconProps> = ({
       animate={{ opacity: 1, x: '-50%', y: '-50%' }} // Fade in the container to enable child animations
       transition={{ duration: 0.5, delay: animationDelay * 0.2 }} 
     >
-      {/* Inner div for continuous drift, opacity pulse, and blur pulse animations */}
+      {/* Inner div for continuous drift, opacity pulse, blur pulse, and glow pulse animations */}
       <motion.div
         animate={{
           x: [0, driftXAmount, 0, -driftXAmount, 0],
           y: [0, driftYAmount, 0, -driftYAmount, 0],
-          // Opacity pulses from very dim to maxPulseOpacity and back to very dim
           opacity: [maxPulseOpacity * 0.15, maxPulseOpacity], 
-          // Filter pulses from blurred to sharp and back to blurred
           filter: ['blur(2.5px)', 'blur(0px)'], 
+          // Glow effect using boxShadow, synced with opacity and blur
+          // hsla(var(--primary-rgb), alpha_value) for theme-aware color
+          boxShadow: [
+            '0 0 0px 0px hsla(var(--primary-rgb), 0)',        // Start/End: no glow, transparent
+            '0 0 15px 5px hsla(var(--primary-rgb), 0.4)', // Peak: visible glow, themed color
+          ],
         }}
         transition={{
           x: {
@@ -92,17 +96,24 @@ const AnimatedIcon: FC<AnimatedIconProps> = ({
             delay: animationDelay + driftDurationY * 0.33, 
           },
           opacity: {
-            duration: pulseDuration, // Use the dedicated pulseDuration
+            duration: pulseDuration, 
             repeat: Infinity,
-            ease: 'easeInOut', // Smooth fade in/out
-            repeatType: 'mirror', // Creates the dim -> bright -> dim effect
+            ease: 'easeInOut', 
+            repeatType: 'mirror', 
             delay: animationDelay, 
           },
           filter: {
-            duration: pulseDuration, // Sync with opacity pulse
+            duration: pulseDuration, 
             repeat: Infinity,
-            ease: 'easeInOut', // Smooth blur/unblur
-            repeatType: 'mirror', // Creates blur -> sharp -> blur effect
+            ease: 'easeInOut', 
+            repeatType: 'mirror', 
+            delay: animationDelay,
+          },
+          boxShadow: { // Transition for the glow effect
+            duration: pulseDuration,
+            repeat: Infinity,
+            ease: 'easeInOut',
+            repeatType: 'mirror',
             delay: animationDelay,
           }
         }}
