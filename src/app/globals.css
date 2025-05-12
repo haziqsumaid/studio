@@ -128,7 +128,8 @@ body {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    /* Removed @apply bg-background; */
+    @apply text-foreground;
     scroll-behavior: smooth;
   }
   html.dark {
@@ -265,3 +266,4 @@ body {
   border-style: solid;
   border-color: transparent hsl(var(--popover)) transparent transparent; /* Arrow points right */
 }
+
