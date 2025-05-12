@@ -74,8 +74,8 @@ const AnimatedIcon: FC<AnimatedIconProps> = ({
           opacity: [maxPulseOpacity * 0.3, maxPulseOpacity * 0.9], // Adjusted opacity range for better visibility
           filter: ['blur(2.5px)', 'blur(0px)'], 
           boxShadow: [
-            '0 0 0px 0px hsla(var(--glow-color-rgb), 0)', // Use --glow-color-rgb
-            '0 0 15px 5px hsla(var(--glow-color-rgb), 0.4)', // Use --glow-color-rgb
+            '0 0 0px 0px hsla(var(--glow-color-rgb), 0)', 
+            '0 0 10px 3px hsla(var(--glow-color-rgb), 0.6)', // Adjusted for firefly: tighter glow, slightly more opaque
           ],
         }}
         transition={{

@@ -71,7 +71,7 @@ body {
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
     --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 
-    --glow-color-rgb: 199, 201, 209; /* Light Grayish Blue for light theme glow */
+    --glow-color-rgb: 119, 207, 66; /* Vibrant Yellow-Green for light theme firefly glow */
   }
 
   .dark {
@@ -123,7 +123,7 @@ body {
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.25), 0 4px 6px -4px rgb(0 0 0 / 0.25);
     --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.3), 0 8px 10px -6px rgb(0 0 0 / 0.3);
 
-    --glow-color-rgb: 50, 60, 70; /* Muted Dark Blue-Gray for dark theme glow */
+    --glow-color-rgb: 56, 239, 125; /* Vibrant Green for dark theme firefly glow (matches --primary) */
   }
 }
 
