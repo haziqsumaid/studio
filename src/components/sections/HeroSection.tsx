@@ -26,48 +26,67 @@ export function HeroSection() {
   const [isDeleting, setIsDeleting] = useState(false);
   
   const [isClient, setIsClient] = useState(false);
-  const [heroActualDimensions, setHeroActualDimensions] = useState({ width: 800, height: 600 }); 
+  const [heroActualDimensions, setHeroActualDimensions] = useState({ width: 0, height: 0 }); 
 
   const heroRef = useRef<HTMLElement>(null);
 
-  const mouseX = useMotionValue(heroActualDimensions.width / 2);
-  const mouseY = useMotionValue(heroActualDimensions.height / 2);
+  const mouseX = useMotionValue(0); // Initialize to 0, will be updated
+  const mouseY = useMotionValue(0); // Initialize to 0, will be updated
+
 
   const framerReducedMotion = useReducedMotion();
-  const [isReducedMotionActive, setIsReducedMotionActive] = useState(false);
+  const [isReducedMotionActive, setIsReducedMotionActive] = useState(true); // Default true for SSR
 
   useEffect(() => {
     setIsClient(true);
-    setIsReducedMotionActive(framerReducedMotion ?? false);
+    setIsReducedMotionActive(framerReducedMotion ?? false); // Set based on hook after mount
 
     const currentHeroRef = heroRef.current;
     if (currentHeroRef) {
       const rect = currentHeroRef.getBoundingClientRect();
       setHeroActualDimensions({ width: rect.width, height: rect.height });
+      // Set initial motion values relative to the center of the element IF NEEDED
+      // For parallax triggered by mouse over element, this might be set to rect.width / 2, rect.height / 2
+      // But if parallax is based on viewport mouse, then 0,0 is fine or event.clientX/Y directly.
+      // For this implementation, we'll set them to center for the rotate effect on mouse move.
       mouseX.set(rect.width / 2);
       mouseY.set(rect.height / 2);
 
+
       const handleMouseMove = (event: MouseEvent) => {
-        const rect = currentHeroRef.getBoundingClientRect(); 
-        mouseX.set(event.clientX - rect.left);
-        mouseY.set(event.clientY - rect.top);
+        // No currentHeroRef check needed here as listener is removed on unmount
+        const localRect = currentHeroRef.getBoundingClientRect(); 
+        mouseX.set(event.clientX - localRect.left);
+        mouseY.set(event.clientY - localRect.top);
       };
       currentHeroRef.addEventListener('mousemove', handleMouseMove);
-      return () => currentHeroRef.removeEventListener('mousemove', handleMouseMove);
+      
+      // Reset on mouse leave to avoid sticky rotation
+      const handleMouseLeave = () => {
+        mouseX.set(heroActualDimensions.width / 2);
+        mouseY.set(heroActualDimensions.height / 2);
+      };
+      currentHeroRef.addEventListener('mouseleave', handleMouseLeave);
+
+      return () => {
+        currentHeroRef.removeEventListener('mousemove', handleMouseMove);
+        currentHeroRef.removeEventListener('mouseleave', handleMouseLeave);
+      }
     }
-  }, [framerReducedMotion, mouseX, mouseY]);
+  }, [framerReducedMotion, mouseX, mouseY, heroActualDimensions.width, heroActualDimensions.height]); // Added heroActualDimensions to dependency array
 
 
-  const rotateXConfig = !isClient || isReducedMotionActive ? [0, 0] : [10, -10];
-  const rotateYConfig = !isClient || isReducedMotionActive ? [0, 0] : [-10, 10];
-  const buttonRotateXConfig = !isClient || isReducedMotionActive ? [0, 0] : [5, -5];
-  const buttonRotateYConfig = !isClient || isReducedMotionActive ? [0, 0] : [-5, 5];
+  const rotateXConfig = !isClient || isReducedMotionActive ? 0 : useTransform(mouseY, [0, heroActualDimensions.height || 600], [10, -10]);
+  const rotateYConfig = !isClient || isReducedMotionActive ? 0 : useTransform(mouseX, [0, heroActualDimensions.width || 800], [-10, 10]);
+
+  const buttonRotateXConfig = !isClient || isReducedMotionActive ? 0 : useTransform(mouseY, [0, heroActualDimensions.height || 600], [5, -5]);
+  const buttonRotateYConfig = !isClient || isReducedMotionActive ? 0 : useTransform(mouseX, [0, heroActualDimensions.width || 800], [-5, 5]);
   
-  const rotateX = useTransform(mouseY, [0, heroActualDimensions.height], rotateXConfig);
-  const rotateY = useTransform(mouseX, [0, heroActualDimensions.width], rotateYConfig);
-
-  const buttonRotateX = useTransform(mouseY, [0, heroActualDimensions.height], buttonRotateXConfig);
-  const buttonRotateY = useTransform(mouseX, [0, heroActualDimensions.width], buttonRotateYConfig);
+  const rotateX = typeof rotateXConfig === 'number' ? rotateXConfig : useSpring(rotateXConfig, { stiffness: 300, damping: 30 });
+  const rotateY = typeof rotateYConfig === 'number' ? rotateYConfig : useSpring(rotateYConfig, { stiffness: 300, damping: 30 });
+  
+  const buttonRotateX = typeof buttonRotateXConfig === 'number' ? buttonRotateXConfig : useSpring(buttonRotateXConfig, { stiffness: 200, damping: 20 });
+  const buttonRotateY = typeof buttonRotateYConfig === 'number' ? buttonRotateYConfig : useSpring(buttonRotateYConfig, { stiffness: 200, damping: 20 });
 
 
   useEffect(() => {
@@ -115,11 +134,13 @@ export function HeroSection() {
   };
   const cvButtonVariantsResolved = isReducedMotionActive || !isClient ? {} : cvButtonVariants;
   const yourName = process.env.NEXT_PUBLIC_YOUR_NAME || "Portfolio";
+  const cvPath = process.env.NEXT_PUBLIC_CV_PATH || "/CV.pdf";
+
 
   return (
-    <section ref={heroRef} id="hero" className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden" style={{ perspective: '1000px' }}>
-      {/* {isClient && <ParticleBackground />} // ParticleBackground removed */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+    <section ref={heroRef} id="hero" className="min-h-screen flex items-center justify-center bg-transparent relative overflow-hidden" style={{ perspective: '1000px' }}>
+      {/* Global AnimatedBackground is now used in layout.tsx, so ParticleBackground removed from here */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10"> {/* Ensure content is above global background */}
         <motion.div
           style={{
             rotateX: rotateX,
@@ -193,7 +214,7 @@ export function HeroSection() {
              className="rounded-lg"
           >
             <Button asChild size="lg" className="gradient-button rounded-lg px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <Link href="/CV.pdf" target="_blank" rel="noopener noreferrer" download={`${yourName}_CV.pdf`}>
+              <Link href={cvPath} target="_blank" rel="noopener noreferrer" download={`${yourName}_CV.pdf`}>
                 <Download className="mr-2 h-5 w-5" />
                 Download CV
               </Link>
@@ -205,4 +226,3 @@ export function HeroSection() {
     </section>
   );
 }
-

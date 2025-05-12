@@ -6,6 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { MotionConfig } from 'framer-motion';
+import { AnimatedBackground } from '@/components/AnimatedBackground'; // Import AnimatedBackground
 
 export const metadata: Metadata = {
   title: 'Backend Brilliance Portfolio | Node.js & DevOps Engineer',
@@ -65,11 +66,14 @@ export default function RootLayout({
       <body className={cn('antialiased bg-background text-foreground font-sans')}>
         <ThemeProvider>
           <MotionConfig reducedMotion="user">
-            <Navbar />
-            <main className="pt-16"> {/* Add padding-top to account for sticky navbar height */}
-              {children}
-            </main>
-            <Footer />
+            <AnimatedBackground /> {/* Add AnimatedBackground here */}
+            <div className="relative z-10 flex flex-col min-h-screen"> {/* Wrapper to keep content above background */}
+              <Navbar />
+              <main className="pt-16 flex-grow"> {/* Add padding-top and flex-grow */}
+                {children}
+              </main>
+              <Footer />
+            </div>
             <Toaster />
           </MotionConfig>
         </ThemeProvider>
