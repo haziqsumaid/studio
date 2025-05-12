@@ -193,7 +193,7 @@ export function HeroSection() {
              className="rounded-lg"
           >
             <Button asChild size="lg" className="gradient-button rounded-lg px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <Link href="/placeholder-cv.pdf" target="_blank" rel="noopener noreferrer" download={`${yourName}_CV.pdf`}>
+              <Link href="/CV.pdf" target="_blank" rel="noopener noreferrer" download={`${yourName}_CV.pdf`}>
                 <Download className="mr-2 h-5 w-5" />
                 Download CV
               </Link>

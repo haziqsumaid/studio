@@ -1,3 +1,4 @@
+
 "use client";
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
@@ -31,7 +32,7 @@ export function MilestoneCard({ milestone, isReducedMotion }: MilestoneCardProps
       style={{ perspective: 1000, scrollSnapAlign: 'start' }} // Add perspective for 3D flip
     >
       <motion.div
-        className="relative w-full h-full cursor-pointer group"
+        className="relative w-full h-full cursor-pointer group" // Has 'group' class
         style={{ transformStyle: "preserve-3d" }}
         animate={{ rotateY: isFlipped ? 180 : 0 }}
         transition={{ duration: 0.6 }}
@@ -41,6 +42,12 @@ export function MilestoneCard({ milestone, isReducedMotion }: MilestoneCardProps
         role="button"
         aria-pressed={isFlipped}
         aria-label={`View details for ${milestone.title}`}
+        whileHover={!isReducedMotion ? {
+          scale: 1.03,
+          // Rely on Tailwind's group-hover for shadow changes on the inner Card.
+          // The Framer Motion boxShadow was complex to apply correctly here and potentially redundant.
+          transition: { type: "spring", stiffness: 300 }
+        } : {}}
       >
         {/* Front of the card */}
         <motion.div
@@ -49,12 +56,7 @@ export function MilestoneCard({ milestone, isReducedMotion }: MilestoneCardProps
         >
           <Card 
             className="h-full bg-card/70 backdrop-blur-md border-border/30 shadow-lg flex flex-col transition-all duration-300 group-hover:shadow-xl group-focus-visible:ring-2 group-focus-visible:ring-primary"
-            // @ts-ignore TODO: fix type framer-motion with asChild of shadcn
-            whileHover={!isReducedMotion ? { 
-              scale: 1.03, 
-              boxShadow: "0px 8px 25px hsla(var(--gradient-middle), 0.2), 0px 0px 15px hsla(var(--gradient-middle), 0.1)",
-              transition: { type: "spring", stiffness: 300 }
-            } : {}}
+            // Removed whileHover from here as Card is not a motion component
           >
             <CardHeader className="pb-2 sm:pb-3">
               <div className="flex items-center justify-between mb-1 sm:mb-2">
@@ -87,3 +89,4 @@ export function MilestoneCard({ milestone, isReducedMotion }: MilestoneCardProps
     </div>
   );
 }
+
