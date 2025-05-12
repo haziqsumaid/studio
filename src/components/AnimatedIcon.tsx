@@ -2,7 +2,7 @@
 "use client";
 
 import type { Icon } from 'lucide-react';
-import { motion, type Variants } from 'framer-motion';
+import { motion } from 'framer-motion';
 import type { FC } from 'react';
 
 interface AnimatedIconProps {
@@ -11,12 +11,11 @@ interface AnimatedIconProps {
   initialY: string; 
   driftXAmount: number; 
   driftYAmount: number; 
-  baseOpacity: number; // This is the target opacity after initial fade-in, and for static icons
-  pulseOpacityFactor: number; 
+  maxPulseOpacity: number; // Renamed from baseOpacity, defines peak opacity during pulse
   animationDelay: number; 
   driftDurationX: number;
   driftDurationY: number;
-  pulseDuration: number;
+  pulseDuration: number; // Duration for one pulse cycle (appear/disappear/blur)
   size?: number;
   color?: string;
   isReducedMotion: boolean;
@@ -28,8 +27,7 @@ const AnimatedIcon: FC<AnimatedIconProps> = ({
   initialY,
   driftXAmount,
   driftYAmount,
-  baseOpacity, // Target opacity
-  pulseOpacityFactor,
+  maxPulseOpacity, // Using renamed prop
   animationDelay,
   driftDurationX,
   driftDurationY,
@@ -47,8 +45,8 @@ const AnimatedIcon: FC<AnimatedIconProps> = ({
           position: 'absolute',
           left: initialX,
           top: initialY,
-          transform: 'translate(-50%, -50%)', // Center the icon
-          opacity: baseOpacity, // Use the passed baseOpacity directly
+          transform: 'translate(-50%, -50%)', 
+          opacity: maxPulseOpacity * 0.5, // Static icons have a fixed, dim opacity
         }}
       >
         <IconComponent size={size} color={color} />
@@ -56,28 +54,27 @@ const AnimatedIcon: FC<AnimatedIconProps> = ({
     );
   }
 
-  // Outer div for initial positioning and fade-in
+  // Outer div for initial positioning and making the element available for child animations
   return (
     <motion.div
       style={{
         position: 'absolute',
         left: initialX,
         top: initialY,
-        // x/y transforms are for centering relative to left/top, handled in initial/animate
       }}
-      initial={{ opacity: 0, x: '-50%', y: '-50%' }} // Start transparent and centered
-      animate={{ opacity: baseOpacity, x: '-50%', y: '-50%' }} // Fade in to baseOpacity, remain centered
-      transition={{ duration: 1, delay: animationDelay * 0.3 }} // Initial fade-in delay
+      initial={{ opacity: 0, x: '-50%', y: '-50%' }} 
+      animate={{ opacity: 1, x: '-50%', y: '-50%' }} // Fade in the container to enable child animations
+      transition={{ duration: 0.5, delay: animationDelay * 0.2 }} 
     >
-      {/* Inner div for continuous drift and pulse animations, starting after the initial fade-in */}
+      {/* Inner div for continuous drift, opacity pulse, and blur pulse animations */}
       <motion.div
-        // x and y here are relative to the parent motion.div's final position (which is centered)
         animate={{
           x: [0, driftXAmount, 0, -driftXAmount, 0],
           y: [0, driftYAmount, 0, -driftYAmount, 0],
-          // Opacity pulses around the already established baseOpacity (from parent's animate).
-          // The child's opacity animation will take over for this element.
-          opacity: [baseOpacity, baseOpacity * pulseOpacityFactor, baseOpacity],
+          // Opacity pulses from very dim to maxPulseOpacity and back to very dim
+          opacity: [maxPulseOpacity * 0.15, maxPulseOpacity], 
+          // Filter pulses from blurred to sharp and back to blurred
+          filter: ['blur(2.5px)', 'blur(0px)'], 
         }}
         transition={{
           x: {
@@ -95,11 +92,18 @@ const AnimatedIcon: FC<AnimatedIconProps> = ({
             delay: animationDelay + driftDurationY * 0.33, 
           },
           opacity: {
-            duration: pulseDuration,
+            duration: pulseDuration, // Use the dedicated pulseDuration
             repeat: Infinity,
-            ease: 'easeInOut',
-            repeatType: 'mirror',
+            ease: 'easeInOut', // Smooth fade in/out
+            repeatType: 'mirror', // Creates the dim -> bright -> dim effect
             delay: animationDelay, 
+          },
+          filter: {
+            duration: pulseDuration, // Sync with opacity pulse
+            repeat: Infinity,
+            ease: 'easeInOut', // Smooth blur/unblur
+            repeatType: 'mirror', // Creates blur -> sharp -> blur effect
+            delay: animationDelay,
           }
         }}
       >

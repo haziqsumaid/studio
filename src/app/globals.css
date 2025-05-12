@@ -14,8 +14,8 @@ body {
 
 @layer base {
   :root {
-    --background-rgb: 247, 250, 252; /* Light Grayish Blue */
-    --background: 210 40% 98%;
+    --background-rgb: 235, 240, 245; /* #EBF0F5 - Very Light Cool Gray */
+    --background: 214 25% 96%; /* HSL equivalent */
     --foreground: 215 25% 27%; /* Dark Desaturated Blue/Gray */
     --card: 0 0% 100%; /* White */
     --card-foreground: 215 25% 27%;
@@ -31,7 +31,7 @@ body {
     --secondary: 210 30% 94%; /* Lighter Grayish Blue */
     --secondary-foreground: 215 20% 35%; 
     --muted: 210 30% 90%; /* Light Gray */
-    --muted-foreground: 215 15% 50%; /* Medium Gray */
+    --muted-foreground: 210 20% 70%; /* For icons, more subtle on light bg */
 
     /* Updated Accent Colors for Light Theme - Subtle Grayish Blue */
     --accent-rgb: 199, 201, 209; /* Light Grayish Blue (approx. for hsl(220, 10%, 80%)) */
@@ -73,8 +73,8 @@ body {
   }
 
   .dark {
-    --background-rgb: 10, 15, 13; /* #0A0F0D in RGB */
-    --background: 160 17% 6%; /* Dark mode base #0A0F0D */
+    --background-rgb: 12, 18, 22; /* #0C1216 - Very Dark Desaturated Cyan */
+    --background: 200 30% 7%; /* HSL equivalent */
     --foreground: 0 0% 95%; /* Light gray for text #F2F2F2 */
     --card: 160 17% 10%; /* Slightly lighter than background */
     --card-foreground: 0 0% 95%;
@@ -87,7 +87,7 @@ body {
     --secondary: 160 10% 15%; /* Darker gray for secondary elements */
     --secondary-foreground: 0 0% 95%;
     --muted: 160 10% 20%; /* Muted backgrounds */
-    --muted-foreground: 0 0% 60%; /* Muted text #999999 */
+    --muted-foreground: 200 15% 35%; /* For icons, slightly lighter/more visible on very dark bg */
     --accent-rgb: 189, 189, 189; /* Gray #BDBDBD in RGB */
     --accent: 0 0% 74%; /* Gray #BDBDBD */
     --accent-foreground: 160 17% 6%; /* Dark text for accent elements */
@@ -128,7 +128,7 @@ body {
     @apply border-border;
   }
   body {
-    /* Removed @apply bg-background; */
+    /* @apply bg-background; // This is handled by AnimatedBackground now */
     @apply text-foreground;
     scroll-behavior: smooth;
   }
@@ -267,3 +267,7 @@ body {
   border-color: transparent hsl(var(--popover)) transparent transparent; /* Arrow points right */
 }
 
+/* Apply background color to the AnimatedBackground div itself */
+.animated-bg-container {
+  @apply bg-background;
+}
