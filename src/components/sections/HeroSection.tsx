@@ -11,9 +11,9 @@ import { cn } from '@/lib/utils';
 import { ScrollPrompt } from '@/components/ScrollPrompt';
 
 const roles = [
-  "< Backend Developer />",
-  "< DevOps Engineer />",
-  "< Ai/ML Engineer />"
+  "<Full Stack Developer />",
+  "<DevOps Engineer />",
+  "<Ai/ML Engineer />"
 ];
 const typingSpeed = 120;
 const deletingSpeed = 60;

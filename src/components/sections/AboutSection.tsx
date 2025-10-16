@@ -107,7 +107,7 @@ export function AboutSection() {
               custom="top"
               className="text-3xl md:text-4xl font-bold mb-8 sm:mb-10 md:mb-12 text-center gradient-text"
             >
-              A Bit About My Journey
+             My Journey
             </motion.h2>
 
             

@@ -3,11 +3,10 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { motion, useReducedMotion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import type { ReactNode } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight, Dot } from 'lucide-react';
-import { MilestoneCard } from './MilestoneCard'; // Ensure MilestoneCard is imported
+import { MilestoneCard } from './MilestoneCard';
 
 export interface Milestone {
   id: string;
@@ -15,7 +14,7 @@ export interface Milestone {
   title: string;
   description: string;
   icon?: ReactNode;
-  details?: string; // For the back of the card
+  details?: string;
 }
 
 interface JourneyTimelineProps {
@@ -44,9 +43,9 @@ export function JourneyTimeline({ milestones }: JourneyTimelineProps) {
       if (timelineRef.current) {
         const firstCard = timelineRef.current.querySelector(':scope > div > div') as HTMLElement;
         if (firstCard) {
-            const cs = getComputedStyle(firstCard);
-            const cardActualWidth = firstCard.offsetWidth + parseFloat(cs.marginLeft) + parseFloat(cs.marginRight);
-            setCardWidth(cardActualWidth > 0 ? cardActualWidth : 256 + 16);
+          const cs = getComputedStyle(firstCard);
+          const cardActualWidth = firstCard.offsetWidth + parseFloat(cs.marginLeft) + parseFloat(cs.marginRight);
+          setCardWidth(cardActualWidth > 0 ? cardActualWidth : 256 + 16);
         }
         setContainerWidth(timelineRef.current.offsetWidth);
         setContentWidth(timelineRef.current.scrollWidth);
@@ -54,19 +53,19 @@ export function JourneyTimeline({ milestones }: JourneyTimelineProps) {
     };
 
     if (typeof window !== 'undefined') {
-      calculateWidths(); 
+      calculateWidths();
       const resizeObserver = new ResizeObserver(calculateWidths);
-      if(timelineRef.current) resizeObserver.observe(timelineRef.current);
-      
+      if (timelineRef.current) resizeObserver.observe(timelineRef.current);
+
       const intervalId = setInterval(calculateWidths, 500);
 
       return () => {
-        if(timelineRef.current) resizeObserver.unobserve(timelineRef.current);
+        if (timelineRef.current) resizeObserver.unobserve(timelineRef.current);
         clearInterval(intervalId);
       };
     }
   }, [milestones]);
-  
+
   useEffect(() => {
     const currentTimelineRef = timelineRef.current;
     const handleScroll = () => {
@@ -98,14 +97,13 @@ export function JourneyTimeline({ milestones }: JourneyTimelineProps) {
 
   return (
     <div className="relative w-full">
-      <h3 className="text-xl sm:text-2xl font-semibold text-foreground mb-6 sm:mb-8 gradient-text">My Professional Path</h3>
       <div
         ref={timelineRef}
-        className="overflow-x-auto pb-4 scrollbar-thin hide-native-scrollbar" 
+        className="overflow-x-auto pb-4 scrollbar-thin hide-native-scrollbar"
         style={{ cursor: reducedMotion ? 'default' : (contentWidth > containerWidth ? 'grab' : 'default'), scrollSnapType: 'x mandatory' }}
       >
         <motion.div
-          className="flex space-x-4 sm:space-x-6 relative py-2 min-w-max h-[280px] sm:h-[300px]" 
+          className="flex space-x-4 sm:space-x-6 relative py-2 min-w-max h-[280px] sm:h-[300px]"
           drag={!reducedMotion && contentWidth > containerWidth ? "x" : false}
           dragConstraints={dragConstraints}
           variants={timelineContainerVariants}
@@ -129,9 +127,9 @@ export function JourneyTimeline({ milestones }: JourneyTimelineProps) {
       {/* Mobile Pagination Dots */}
       {milestones.length > 1 && (
         <div className="flex md:hidden justify-center items-center space-x-1 mt-4">
-            <Button variant="ghost" size="icon" onClick={() => scrollToMilestone(Math.max(0, activeMilestoneIndex -1))} disabled={activeMilestoneIndex === 0} aria-label="Previous milestone">
-                <ChevronLeft className="h-5 w-5"/>
-            </Button>
+          <Button variant="ghost" size="icon" onClick={() => scrollToMilestone(Math.max(0, activeMilestoneIndex - 1))} disabled={activeMilestoneIndex === 0} aria-label="Previous milestone">
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
           {milestones.map((_, index) => (
             <button
               key={`dot-${index}`}
@@ -146,9 +144,9 @@ export function JourneyTimeline({ milestones }: JourneyTimelineProps) {
               <Dot size={activeMilestoneIndex === index ? 32 : 24} strokeWidth={activeMilestoneIndex === index ? 3 : 2.5} />
             </button>
           ))}
-           <Button variant="ghost" size="icon" onClick={() => scrollToMilestone(Math.min(milestones.length - 1, activeMilestoneIndex + 1))} disabled={activeMilestoneIndex === milestones.length - 1} aria-label="Next milestone">
-                <ChevronRight className="h-5 w-5"/>
-            </Button>
+          <Button variant="ghost" size="icon" onClick={() => scrollToMilestone(Math.min(milestones.length - 1, activeMilestoneIndex + 1))} disabled={activeMilestoneIndex === milestones.length - 1} aria-label="Next milestone">
+            <ChevronRight className="h-5 w-5" />
+          </Button>
         </div>
       )}
       {!reducedMotion && contentWidth > containerWidth && (
